@@ -1,6 +1,14 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import StudentForm from "./modalFeilds/StudentForm";
 import CourseFields from "./modalFeilds/VideoFields";
 import QuizFields from "./modalFeilds/QuizFeilds";
@@ -50,8 +58,6 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
       onSave(formData);
     }
   };
-
-  if (!isOpen) return null;
 
   const renderFormFields = () => {
     switch (location) {
@@ -143,7 +149,6 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
     }
   };
 
-  // const showButtons = !(location === 'manageJob' && view) || (location === 'manageSchool' && view)
   const showButtons = !(
     view &&
     (location === "manageSchool" ||
@@ -152,50 +157,42 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
   );
 
   return (
-    <div className="fixed  inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div
-        className={`bg-white rounded-lg   ${view || location === "portfolio"
-          ? "w-[60vw] p-8"
-          : "max-w-4xl w-full p-6 mx-4"
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className={`max-h-[90vh] overflow-y-auto ${view || location === "portfolio"
+            ? "max-w-[60vw]"
+            : "max-w-4xl"
           }`}
       >
-        <div className="flex justify-between mb-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900">{title}</h2>
-            <p className="text-[#737373] mt-1">{subTitle}</p>
-          </div>
-          <button
-            onClick={onClose}
-            className="h-8 w-8 p-0 rounded-md hover:bg-gray-100 flex items-center justify-center"
-            type="button"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {subTitle && <DialogDescription>{subTitle}</DialogDescription>}
+        </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {renderFormFields()}
 
           {showButtons && (
-            <div className="flex gap-3 justify-end pt-4">
-              <button
+            <DialogFooter className="gap-3">
+              <Button
                 type="button"
+                variant="outline"
                 onClick={onClose}
-                className="border hover:bg-gray-400 popmed text-gray-800 py-2 px-4 rounded-[20px] transition-colors"
+                className="rounded-[20px]"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="rounded-[20px] bg-[#FFFF00] popmed text-black py-2 px-4 transition-colors"
+                className="bg-[#FFFF00] text-black hover:bg-[#FFFF00]/90 rounded-[20px]"
               >
                 {submitText}
-              </button>
-            </div>
+              </Button>
+            </DialogFooter>
           )}
         </form>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

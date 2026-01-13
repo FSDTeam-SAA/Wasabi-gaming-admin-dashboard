@@ -1,6 +1,15 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { Upload, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const QuizFields = ({ formData, onChange, edit = false }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
@@ -24,49 +33,49 @@ const QuizFields = ({ formData, onChange, edit = false }) => {
 
   // Form fields configuration
   const createFields = [
-    { 
-      name: "name", 
-      label: "Quiz Title", 
-      type: "text", 
-      placeholder: "e.g., Contract Law - Chapter 3: Offer and Acceptance" 
+    {
+      name: "name",
+      label: "Quiz Title",
+      type: "text",
+      placeholder: "e.g., Contract Law - Chapter 3: Offer and Acceptance",
     },
-{
-  name: "educationLevel",
-  label: "Education Level",
-  type: "select",
-  options: [
-    { label: "Reception", value: "RECEPTION" },
+    {
+      name: "educationLevel",
+      label: "Education Level",
+      type: "select",
+      options: [
+        { label: "Reception", value: "RECEPTION" },
 
-    { label: "Year 1", value: "Y1" },
-    { label: "Year 2", value: "Y2" },
-    { label: "Year 3", value: "Y3" },
-    { label: "Year 4", value: "Y4" },
-    { label: "Year 5", value: "Y5" },
-    { label: "Year 6", value: "Y6" },
+        { label: "Year 1", value: "Y1" },
+        { label: "Year 2", value: "Y2" },
+        { label: "Year 3", value: "Y3" },
+        { label: "Year 4", value: "Y4" },
+        { label: "Year 5", value: "Y5" },
+        { label: "Year 6", value: "Y6" },
 
-    { label: "Year 7", value: "Y7" },
-    { label: "Year 8", value: "Y8" },
-    { label: "Year 9", value: "Y9" },
+        { label: "Year 7", value: "Y7" },
+        { label: "Year 8", value: "Y8" },
+        { label: "Year 9", value: "Y9" },
 
-    { label: "GCSE – Year 10", value: "Y10" },
-    { label: "GCSE – Year 11", value: "Y11" },
+        { label: "GCSE – Year 10", value: "Y10" },
+        { label: "GCSE – Year 11", value: "Y11" },
 
-    { label: "A-Level – Year 12", value: "Y12" },
-    { label: "A-Level – Year 13", value: "Y13" }
-  ],
-  placeholder: "Select education level"
-},
-    { 
-      name: "questions", 
-      label: "Number of Questions", 
-      type: "text", 
-      placeholder: "e.g., 25" 
+        { label: "A-Level – Year 12", value: "Y12" },
+        { label: "A-Level – Year 13", value: "Y13" },
+      ],
+      placeholder: "Select education level",
     },
-    { 
-      name: "duration", 
-      label: "Duration (minutes)", 
-      type: "text", 
-      placeholder: "e.g., 60" 
+    {
+      name: "questions",
+      label: "Number of Questions",
+      type: "text",
+      placeholder: "e.g., 25",
+    },
+    {
+      name: "duration",
+      label: "Duration (minutes)",
+      type: "text",
+      placeholder: "e.g., 60",
     },
     {
       name: "status",
@@ -83,36 +92,39 @@ const QuizFields = ({ formData, onChange, edit = false }) => {
   ];
 
   // Filter out status field if in create mode and not edit
-  const fields = edit ? createFields : createFields.filter(field => field.name !== "status");
+  const fields = edit
+    ? createFields
+    : createFields.filter((field) => field.name !== "status");
 
   const renderField = (field) => {
     switch (field.type) {
       case "select":
         return (
-          <select
-            id={field.name}
+          <Select
             value={formData[field.name] || ""}
-            onChange={(e) => onChange(field.name, e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
+            onValueChange={(value) => onChange(field.name, value)}
           >
-            <option value="">{field.placeholder}</option>
-            {field.options.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger>
+              <SelectValue placeholder={field.placeholder} />
+            </SelectTrigger>
+            <SelectContent>
+              {field.options.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         );
-      
+
       default:
         return (
-          <input
+          <Input
             type={field.type}
             id={field.name}
             value={formData[field.name] || ""}
             onChange={(e) => onChange(field.name, e.target.value)}
             placeholder={field.placeholder}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
           />
         );
     }
@@ -123,13 +135,8 @@ const QuizFields = ({ formData, onChange, edit = false }) => {
       {/* Form Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {fields.map((field) => (
-          <div key={field.name}>
-            <label 
-              htmlFor={field.name} 
-              className="block text-sm font-medium text-gray-700"
-            >
-              {field.label}
-            </label>
+          <div key={field.name} className="space-y-2">
+            <Label htmlFor={field.name}>{field.label}</Label>
             {renderField(field)}
           </div>
         ))}
@@ -137,9 +144,7 @@ const QuizFields = ({ formData, onChange, edit = false }) => {
 
       {/* Upload Section */}
       <div className="border-t pt-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Upload quiz file
-        </label>
+        <Label className="mb-2 block">Upload quiz file</Label>
 
         <label className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 cursor-pointer hover:border-yellow-400 transition">
           <Upload className="h-6 w-6 text-gray-400 mb-2" />
@@ -147,7 +152,8 @@ const QuizFields = ({ formData, onChange, edit = false }) => {
             Click to upload or drag and drop
           </p>
           <p className="text-xs text-gray-400">
-            Upload case files, legal documents, or question banks (CSV, PDF) Max. 5MB
+            Upload case files, legal documents, or question banks (CSV, PDF) Max.
+            5MB
           </p>
 
           <input
@@ -192,8 +198,8 @@ const QuizFields = ({ formData, onChange, edit = false }) => {
           {/* CSV Preview */}
           {isCSV && (
             <p className="text-sm text-gray-600">
-              Case file uploaded successfully. Preview not supported —
-              document will be processed for legal terminology and citations.
+              Case file uploaded successfully. Preview not supported — document
+              will be processed for legal terminology and citations.
             </p>
           )}
         </div>
