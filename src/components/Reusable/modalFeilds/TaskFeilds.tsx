@@ -1,77 +1,69 @@
 "use client";
 import React from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 
 const TaskFields = ({ formData, onChange, edit = false }) => {
     return (
         <div className="space-y-4">
             {/* Task Title */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Task Title
-                </label>
-                <input
+            <div className="space-y-2">
+                <Label>Task Title</Label>
+                <Input
                     type="text"
                     placeholder="e.g., Physics Lab Report"
                     value={formData.title || ""}
                     onChange={(e) => onChange("title", e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 />
             </div>
 
             {/* Course */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Course
-                </label>
-                <select
+            <div className="space-y-2">
+                <Label>Course</Label>
+                <Select
                     value={formData.course || ""}
-                    onChange={(e) => onChange("course", e.target.value)}
-                    className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    onValueChange={(value) => onChange("course", value)}
                 >
-                    <option value="">Select course</option>
-                    <option value="Physics Fundamentals">
-                        Physics Fundamentals
-                    </option>
-                    <option value="Mathematics">
-                        Mathematics
-                    </option>
-                    <option value="Chemistry">
-                        Chemistry
-                    </option>
-                </select>
+                    <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Select course" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Physics Fundamentals">
+                            Physics Fundamentals
+                        </SelectItem>
+                        <SelectItem value="Mathematics">Mathematics</SelectItem>
+                        <SelectItem value="Chemistry">Chemistry</SelectItem>
+                    </SelectContent>
+                </Select>
             </div>
 
             {/* Due Date & Total Students */}
             <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Due Date
-                    </label>
-                    <input
+                <div className="space-y-2">
+                    <Label>Due Date</Label>
+                    <Input
                         type="date"
                         value={formData.dueDate || ""}
                         onChange={(e) => onChange("dueDate", e.target.value)}
-                        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
                     />
                 </div>
 
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Total Students
-                    </label>
-                    <input
+                <div className="space-y-2">
+                    <Label>Total Students</Label>
+                    <Input
                         type="number"
                         placeholder="0"
                         value={formData.totalStudents || ""}
-                        onChange={(e) =>
-                            onChange("totalStudents", e.target.value)
-                        }
+                        onChange={(e) => onChange("totalStudents", e.target.value)}
                         disabled={edit}
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none ${
-                            edit
-                                ? "bg-gray-100 cursor-not-allowed"
-                                : "focus:ring-2 focus:ring-yellow-400"
-                        }`}
+                        className={edit ? "bg-muted cursor-not-allowed" : ""}
                     />
                 </div>
             </div>
@@ -80,33 +72,31 @@ const TaskFields = ({ formData, onChange, edit = false }) => {
             {edit && (
                 <>
                     {/* Status */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Status
-                        </label>
-                        <select
+                    <div className="space-y-2">
+                        <Label>Status</Label>
+                        <Select
                             value={formData.status || "Pending"}
-                            onChange={(e) =>
-                                onChange("status", e.target.value)
-                            }
-                            className="w-full px-3 py-2 border rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                            onValueChange={(value) => onChange("status", value)}
                         >
-                            <option value="Pending">Pending</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Overdue">Overdue</option>
-                        </select>
+                            <SelectTrigger className="bg-white">
+                                <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="Pending">Pending</SelectItem>
+                                <SelectItem value="Completed">Completed</SelectItem>
+                                <SelectItem value="Overdue">Overdue</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     {/* Submissions */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Submissions
-                        </label>
-                        <input
+                    <div className="space-y-2">
+                        <Label>Submissions</Label>
+                        <Input
                             type="text"
                             value={formData.submissions || ""}
                             disabled
-                            className="w-full px-3 py-2 border rounded-md bg-gray-100 cursor-not-allowed"
+                            className="bg-muted cursor-not-allowed"
                         />
                     </div>
                 </>
