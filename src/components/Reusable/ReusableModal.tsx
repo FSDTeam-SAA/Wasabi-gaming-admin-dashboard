@@ -1,5 +1,6 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -39,17 +40,37 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
   location,
   isOpen,
   onClose,
-  onSave = () => { },
+  onSave = () => {},
   subTitle,
   submitText = "Save",
   edit,
   data,
   view,
 }) => {
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState<any>({});
+  const hasSetInitialData = useRef(false);
+
+  useEffect(() => {
+    // Reset when modal closes
+    if (!isOpen) {
+      setFormData({});
+      hasSetInitialData.current = false;
+      return;
+    }
+
+    // Set initial data ONLY ONCE when modal first opens
+    if (!hasSetInitialData.current) {
+      if ((view || edit) && data) {
+        setFormData(data);
+      } else {
+        setFormData({});
+      }
+      hasSetInitialData.current = true;
+    }
+  }, [isOpen]); // Only depend on isOpen - no loop when formData changes
 
   const handleChange = (name: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -85,7 +106,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
             formData={formData}
             onChange={handleChange}
             edit={edit}
-            job={data}
+            job={data}                    // View/Edit mode uses this prop directly
             view={view}
             onClose={onClose}
           />
@@ -159,10 +180,9 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className={`max-h-[90vh] overflow-y-auto ${view || location === "portfolio"
-            ? "max-w-[60vw]"
-            : "max-w-4xl"
-          }`}
+        className={`max-h-[90vh] overflow-y-auto ${
+          view || location === "portfolio" ? "max-w-[60vw]" : "max-w-4xl"
+        }`}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
