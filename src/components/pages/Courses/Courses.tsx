@@ -1,4 +1,3 @@
-
 // "use client";
 // import { useState } from 'react';
 // import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
@@ -8,6 +7,7 @@
 // import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 // import { useSession } from 'next-auth/react';
 // import { toast } from 'sonner';
+// import CourseEditFields from '@/components/Reusable/modalFeilds/CourseEditFields';
 
 // // Category → Color mapping
 // const getCategoryColor = (category: string = '') => {
@@ -84,6 +84,49 @@
 // const CourseCard = ({ course }: { course: Course }) => {
 //   const [open, setOpen] = useState(false);
 //   const color = getCategoryColor(course.category);
+
+//   const initialEditData = {
+//     courseName: course.name || "",
+//     description: course.description || "",
+//     grade: course.gradeLevel || "",
+//     category: course.category || "",
+//     coursePrice: course.coursePrice || 0,
+//     videos: course.courseVideo.map((video: any) => ({ file: null, title: video.title, existingUrl: video.url, time: video.time }))
+//   };
+
+//   const { mutate: deleteCourse, isPending } = useMutation({
+//     mutationFn: async (id: string) => {
+//       const res = await fetch(
+//         `${process.env.NEXT_PUBLIC_BACKEND_URL}/course/${id}`,
+//         {
+//           method: "DELETE",
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//           },
+//         }
+//       );
+
+//       if (!res.ok) throw new Error("Failed to delete course");
+//       return res.json();
+//     },
+
+//     onSuccess: () => {
+//       toast.success("Course deleted successfully!");
+//       queryClient.invalidateQueries({ queryKey: ["courses"] });
+//     },
+
+//     onError: () => {
+//       toast.error("Failed to delete course");
+//     },
+//   });
+
+//   const handleDeleteClick = () => {
+//     deleteCourse(course._id);
+//   };
+
+
+//   console.log("Edit modal initial data:", initialEditData);
+
 //   return (
 //     <div className='bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-gray-200 group'>
 //       <div className='flex justify-between items-start mb-6'>
@@ -112,33 +155,24 @@
 //       <div className='flex justify-between items-center gap-3'>
 //         <button
 //           onClick={() => setOpen(true)}
-//           className='flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-2.5 px-4 text-gray-700 hover:bg-gray-50 transition-all'
+//           className='flex-1 flex items-center justify-center gap-2 border border-gray-200 rounded-xl py-2.5 px-4 text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 font-medium text-sm group-hover:shadow-sm'
 //         >
 //           <FaEdit className="text-xs" />
 //           Edit Course
 //         </button>
-//         <button className='w-12 flex items-center justify-center border border-gray-200 rounded-xl py-2.5 hover:bg-red-50 hover:text-red-600 transition-all'>
+//         <button onClick={handleDeleteClick} className='flex items-center justify-center w-[20%] border border-gray-200 rounded-xl py-2.5 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-200 text-gray-500 group-hover:shadow-sm'>
 //           <FaTrash className="text-xs" />
 //         </button>
 //       </div>
 
-//       <ReusableModal
-//         isOpen={open}
-//         onClose={() => setOpen(false)}
-//         onSave={() => { /* Implement edit later */ }}
-//         title="Edit Course"
-//         fields={courseFields}
-//         location="course"
-//         edit={true}
-//         submitText="Save Changes"
-//         data={{
-//           courseName: course.name,
-//           description: course.description || '',
-//           grade: course.gradeLevel,
-//           category: course.category,
-//           coursePrice: course.coursePrice,
-//         }}
-//       />
+//       {open && (
+//         <CourseEditFields
+//           open={open}
+//           setOpen={setOpen}
+//           initialData={initialEditData}
+//           courseId={course._id}
+//         />
+//       )}
 //     </div>
 //   );
 // };
@@ -151,11 +185,11 @@
 
 //   const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
 
-//   const { 
-//     data: apiResponse, 
-//     isLoading, 
+//   const {
+//     data: apiResponse,
+//     isLoading,
 //     isError,
-//     error 
+//     error
 //   } = useQuery({
 //     queryKey: ["courses", token],
 //     queryFn: async () => {
@@ -204,7 +238,7 @@
 
 //   const handleCreateCourse = (modalData: any) => {
 //     const formData = new FormData();
-
+//     console.log(modalData)
 //     const coursePayload = {
 //       name: modalData.courseName?.trim() || "",
 //       description: modalData.description?.trim() || "",
@@ -215,7 +249,6 @@
 
 //     formData.append("data", JSON.stringify(coursePayload));
 
-//     // Handle multiple videos
 //     if (modalData.videos && Array.isArray(modalData.videos)) {
 //       modalData.videos.forEach((video: any) => {
 //         if (video?.file instanceof File) {
@@ -224,7 +257,6 @@
 //       });
 //     }
 
-//     // Video titles (comma separated)
 //     let titles: string[] = [];
 //     if (typeof modalData.videoTitle === 'string' && modalData.videoTitle.trim()) {
 //       titles = modalData.videoTitle
@@ -285,6 +317,7 @@
 //         </div>
 //       )}
 
+//       {/* Create এর জন্য ReusableModal ঠিক আছে, পরিবর্তন করা হয়নি */}
 //       <ReusableModal
 //         isOpen={createModalOpen}
 //         onClose={() => setCreateModalOpen(false)}
@@ -300,10 +333,10 @@
 // }
 
 
+
 "use client";
 import { useState } from 'react';
-import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
-import { FaUsers } from "react-icons/fa";
+import { FaEdit, FaPlus, FaTrash, FaUsers } from "react-icons/fa";
 import Headers from "../../Reusable/Headers";
 import ReusableModal from '../../Reusable/ReusableModal';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -385,9 +418,14 @@ interface Course {
 
 const CourseCard = ({ course }: { course: Course }) => {
   const [open, setOpen] = useState(false);
+
+  // ✅ Delete fix only
+  const queryClient = useQueryClient();
+  const { data: sessionData } = useSession();
+  const token = sessionData?.user?.accessToken;
+
   const color = getCategoryColor(course.category);
 
-  // Edit এর জন্য initial data (CourseEditFields এ পাঠানো হবে)
   const initialEditData = {
     courseName: course.name || "",
     description: course.description || "",
@@ -397,7 +435,33 @@ const CourseCard = ({ course }: { course: Course }) => {
     videos: course.courseVideo.map((video: any) => ({ file: null, title: video.title, existingUrl: video.url, time: video.time }))
   };
 
-  console.log("Edit modal initial data:", initialEditData);
+  const { mutate: deleteCourse, isPending } = useMutation({
+    mutationFn: async (id: string) => {
+      if (!token) throw new Error("Unauthorized");
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/course/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to delete course");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("Course deleted successfully!");
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+    },
+    onError: () => {
+      toast.error("Failed to delete course");
+    },
+  });
+
+  const handleDeleteClick = () => {
+    deleteCourse(course._id);
+  };
 
   return (
     <div className='bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-gray-200 group'>
@@ -432,12 +496,11 @@ const CourseCard = ({ course }: { course: Course }) => {
           <FaEdit className="text-xs" />
           Edit Course
         </button>
-        <button className='flex items-center justify-center w-[20%] border border-gray-200 rounded-xl py-2.5 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-200 text-gray-500 group-hover:shadow-sm'>
+        <button onClick={handleDeleteClick} className='flex items-center justify-center w-[20%] border border-gray-200 rounded-xl py-2.5 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-200 text-gray-500 group-hover:shadow-sm'>
           <FaTrash className="text-xs" />
         </button>
       </div>
 
-      {/* Edit এর জন্য আলাদা কম্পোনেন্ট */}
       {open && (
         <CourseEditFields
           open={open}
@@ -456,14 +519,9 @@ export default function Courses() {
   const token = sessionData?.user?.accessToken;
   const queryClient = useQueryClient();
 
-  const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
 
-  const {
-    data: apiResponse,
-    isLoading,
-    isError,
-    error
-  } = useQuery({
+  const { data: apiResponse, isLoading, isError, error } = useQuery({
     queryKey: ["courses", token],
     queryFn: async () => {
       if (!token) throw new Error("Authentication required");
@@ -511,7 +569,6 @@ export default function Courses() {
 
   const handleCreateCourse = (modalData: any) => {
     const formData = new FormData();
-    console.log(modalData)
     const coursePayload = {
       name: modalData.courseName?.trim() || "",
       description: modalData.description?.trim() || "",
@@ -590,7 +647,6 @@ export default function Courses() {
         </div>
       )}
 
-      {/* Create এর জন্য ReusableModal ঠিক আছে, পরিবর্তন করা হয়নি */}
       <ReusableModal
         isOpen={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
