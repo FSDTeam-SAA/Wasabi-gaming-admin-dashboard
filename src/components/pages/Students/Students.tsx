@@ -1,101 +1,223 @@
-"use client";
-import React, { useState } from 'react';
-import { FaPerson } from "react-icons/fa6";
-import Headers from "../../Reusable/Headers";
-import CommonTable from "../../Reusable/CommonTable";
+'use client'
 
-import ReusableModal from '../../Reusable/ReusableModal';
-import { MdPersonAddAlt1 } from 'react-icons/md';
+import React, { useState } from 'react'
+import { Trash2 } from 'lucide-react'
+import Headers from '../../Reusable/Headers'
+import ReusableModal from '../../Reusable/ReusableModal'
+import { MdPersonAddAlt1 } from 'react-icons/md'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { useAddStudent, useGetAllStudent, useStudentDelete } from '@/hooks/apiCalling'
+import { useSession } from 'next-auth/react'
+import { Skeleton } from '@/components/ui/skeleton'
+import { ReusablePagination } from '@/components/pagination'
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
+} from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 
-
-const sampleData = [
-    {
-        student: "Sarah Johnson",
-        email: "sarah.j@email.com",
-        grade: "10th",
-        courses: 5,
-        status: "Active",
-    },
-    {
-        student: "Michael Chen",
-        email: "michael.c@email.com",
-        grade: "11th",
-        courses: 6,
-        status: "Active",
-    },
-    {
-        student: "Emma Williams",
-        email: "emma.w@email.com",
-        grade: "9th",
-        courses: 4,
-        status: "Inactive",
-    },
-    {
-        student: "James Davis",
-        email: "james.d@email.com",
-        grade: "12th",
-        courses: 7,
-        status: "Active",
-    },
-    {
-        student: "Olivia Martinez",
-        email: "olivia.m@email.com",
-        grade: "10th",
-        courses: 5,
-        status: "Active",
-    },
-];
-
-const filterOptions = ["All", "9th", "10th", "11th", "12th"];
-
-const columns = [
-    { header: "Student", accessor: "student" },
-    { header: "Email", accessor: "email" },
-    { header: "Grade", accessor: "grade" },
-    { header: "Courses", accessor: "courses" },
-    { header: "Status", accessor: "status" },
-    { header: "Actions", accessor: "actions" },
-];
+const filterOptions = ['All', '9th', '10th', '11th', '12th']
 
 const Students = () => {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(false)
+    const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+    const [studentToDelete, setStudentToDelete] = useState<{ id: string; name: string } | null>(null)
+    const [selectedFilter, setSelectedFilter] = useState('All')
+    const [searchTerm, setSearchTerm] = useState('')
+    const [currentPage, setCurrentPage] = useState(1)
+    const [itemsPerPage] = useState(10)
 
-    const handleSave = (data) => {
-        console.log("Saved data:", data);
-        setOpen(false);
-    };
+    const { data: sessionData } = useSession()
+    const token = (sessionData?.user as { accessToken: string })?.accessToken
+
+    const { data, isLoading, isError, refetch } = useGetAllStudent(
+        currentPage,
+        itemsPerPage,
+        selectedFilter === 'All' ? '' : selectedFilter,
+        searchTerm || '',
+        token
+    )
+
+    const deleteMutation = useStudentDelete(token)
+    const addStudent = useAddStudent(token, () => setOpen(false))
+
+    const meta = data?.meta
+    const totalResults = meta?.total || 0
+    const totalPages = Math.ceil(totalResults / itemsPerPage)
+
+    const handleDeleteClick = (id: string, name: string) => {
+        setStudentToDelete({ id, name })
+        setDeleteModalOpen(true)
+    }
+
+    const handleConfirmDelete = () => {
+        if (!studentToDelete) return
+        deleteMutation.mutate(studentToDelete.id, {
+            onSuccess: () => {
+                refetch()
+                setDeleteModalOpen(false)
+                setStudentToDelete(null)
+            },
+        })
+    }
+
+    const handleSave = (studentData: { fullName: string, email: string, grade: string, status: string }) => {
+        addStudent.mutate(studentData)
+
+        refetch()
+    }
 
     return (
         <div>
-            <div className='flex justify-between items-center'>
-                <Headers title={"Students"} subHeader={"Manage all students enrolled in your platform"} />
-                <button onClick={() => setOpen(true)} className="flex gap-2 items-center bg-[#FFFF00] py-2 rounded-3xl px-5 shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]">
+            <div className="flex justify-between items-center">
+                <Headers title="Students" subHeader="Manage all students enrolled in your platform" />
+                <button
+                    onClick={() => setOpen(true)}
+                    className="flex gap-2 items-center bg-[#FFFF00] py-2 rounded-3xl px-5 shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]"
+                >
                     <MdPersonAddAlt1 size={18} /> Add Student
                 </button>
-
             </div>
 
-            <div className="bg-white mt-8 p-5 border-r-2 border-b-2 border-l-2 border-[#0000001A] rounded-2xl">
-                <CommonTable
-
-                    columns={columns}
-                    data={sampleData}
-                    filterOptions={filterOptions}
+            {/* Search & Filter */}
+            <div className="flex flex-col sm:flex-row justify-between sm:items-center my-4 gap-3">
+                <input
+                    type="text"
+                    placeholder="Search students..."
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className="pl-3 pr-4 py-2 text-sm bg-[#F9F9F9] border w-[300px] border-gray-200 rounded-full focus:ring-1 focus:ring-blue-400 focus:outline-none"
                 />
+
+                <Select value={selectedFilter} onValueChange={setSelectedFilter}>
+                    <SelectTrigger className="w-[150px] rounded-full">
+                        <SelectValue placeholder="Filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {filterOptions.map(opt => (
+                            <SelectItem key={opt} value={opt}>
+                                {opt}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
             </div>
 
+            {/* Table */}
+            {isLoading ? (
+                <div className="border rounded-lg overflow-hidden">
+                    <Skeleton className="h-10 w-full mb-2" />
+                    <Skeleton className="h-10 w-full mb-2" />
+                    <Skeleton className="h-10 w-full mb-2" />
+                </div>
+            ) : isError ? (
+                <div className="text-red-600 py-10 text-center">❌ Failed to load students</div>
+            ) : (
+                <div className="overflow-x-auto border rounded-lg">
+                    <table className="w-full text-left text-sm">
+                        <thead>
+                            <tr className="text-gray-600 border-b-2 border-gray-200">
+                                <th className="py-4 px-4 font-semibold">Name</th>
+                                <th className="py-4 px-4 font-semibold">Email</th>
+                                <th className="py-4 px-4 font-semibold">Grade</th>
+                                <th className="py-4 px-4 font-semibold">Courses</th>
+                                <th className="py-4 px-4 font-semibold">Status</th>
+                                <th className="py-4 px-4 font-semibold text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {data?.data?.map(student => (
+                                <tr key={student._id} className="border-b hover:bg-gray-50">
+                                    <td className="py-4 px-4">{student.firstName} {student.lastName}</td>
+                                    <td className="py-4 px-4">{student.email}</td>
+                                    <td className="py-4 px-4">{student.grade || '-'}</td>
+                                    <td className="py-4 px-4">{student.course?.length || 0}</td>
+                                    <td className="py-4 px-4">
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-xs font-medium ${student.status === 'active'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-gray-200 text-gray-600'
+                                                }`}
+                                        >
+                                            {student.status}
+                                        </span>
+                                    </td>
+                                    <td className="py-4 px-4 text-right">
+                                        <Button
+                                            variant="destructive"
+                                            size="icon"
+                                            onClick={() =>
+                                                handleDeleteClick(student._id, `${student.firstName} ${student.lastName}`)
+                                            }
+                                        >
+                                            <Trash2 size={16} />
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            {/* Pagination */}
+            {!isLoading && !isError && totalPages > 1 && (
+                <div className="mt-4">
+                    <ReusablePagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        totalResults={totalResults}
+                        resultsPerPage={itemsPerPage}
+                        onPageChange={setCurrentPage}
+                        
+                    />
+                </div>
+            )}
+
+            {/* Add Student Modal */}
             <ReusableModal
                 isOpen={open}
                 onClose={() => setOpen(false)}
                 onSave={handleSave}
-                subTitle='Add a new student to your school management platform.'
                 title="Add Student"
-                location={'student'}
+                subTitle="Add a new student to your school management platform."
                 submitText="Add Student"
+                location="student"
+                loading={addStudent.isPending}
             />
+
+            {/* ShadCN Delete Confirmation Dialog */}
+            <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+                <DialogContent className="sm:max-w-[400px]">
+                    <DialogHeader>
+                        <DialogTitle>Delete Student</DialogTitle>
+                        <DialogDescription>
+                            Are you sure you want to delete{' '}
+                            <strong>{studentToDelete?.name}</strong>? This action cannot be undone.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="flex justify-between">
+                        <Button variant="outline" onClick={() => setDeleteModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="destructive" onClick={handleConfirmDelete}>
+                            Delete
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
-    );
-};
+    )
+}
 
-export default Students;
-
+export default Students

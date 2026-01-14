@@ -19,6 +19,7 @@ import CreateLawFeilds from "./modalFeilds/CreateLawFeilds";
 import ManageApplicationFeild from "./modalFeilds/ManageApplicationFeild";
 import PortfolioFeilds from "./modalFeilds/PortfolioFeilds";
 import UpdatePlansFeilds from "./modalFeilds/UpdatePlansFeilds";
+import { Loader2 } from "lucide-react";
 
 interface ReusableModalProps {
   title: string;
@@ -30,6 +31,7 @@ interface ReusableModalProps {
   submitText?: string;
   edit?: boolean;
   data?: any;
+  loading?: boolean;
   view?: boolean;
   fields?: any[];
 }
@@ -43,6 +45,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
   subTitle,
   submitText = "Save",
   edit,
+  loading,
   data,
   view,
 }) => {
@@ -62,7 +65,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
   const renderFormFields = () => {
     switch (location) {
       case "student":
-        return <StudentForm formData={formData} onChange={handleChange} />;
+        return <StudentForm  formData={formData} onChange={handleChange} />;
       case "quiz":
         return (
           <QuizFields formData={formData} onChange={handleChange} edit={edit} />
@@ -160,8 +163,8 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
         className={`max-h-[90vh] overflow-y-auto ${view || location === "portfolio"
-            ? "max-w-[60vw]"
-            : "max-w-4xl"
+          ? "max-w-[60vw]"
+          : "max-w-4xl"
           }`}
       >
         <DialogHeader>
@@ -186,7 +189,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
                 type="submit"
                 className="bg-[#FFFF00] text-black hover:bg-[#FFFF00]/90 rounded-[20px]"
               >
-                {submitText}
+                {submitText} {loading && <Loader2 className="animate-spin mr-2" />}
               </Button>
             </DialogFooter>
           )}
