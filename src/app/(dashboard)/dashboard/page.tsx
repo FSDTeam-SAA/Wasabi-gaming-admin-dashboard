@@ -1,8 +1,9 @@
 'use client';
 
+import OverviewTable from "@/components/dashboard/_components/overview-table/OverviewTable";
+import StatsCards from "@/components/dashboard/_components/stats-cards/StatsCards";
 import Headers from "@/components/Reusable/Headers";
-import StatsCards from "./_components/stats-cards/StatsCards";
-import OverviewTable from "./_components/overview-table/OverviewTable";
+
 
 export default function Page() {
   return (
