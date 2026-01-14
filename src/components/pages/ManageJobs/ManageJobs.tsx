@@ -13,6 +13,7 @@ import ReusableModal from "../../Reusable/ReusableModal";
 import { FaPlus } from "react-icons/fa6";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import LoderComponent from "@/components/loader/LoderComponent";
 
 // Jobs Card Component (একদম অপরিবর্তিত)
 const JobsCard = ({
@@ -276,7 +277,7 @@ const ManageJobs = () => {
   });
 
   // Loading & Error states
-  if (isLoading) return <div className="text-center py-10">Loading jobs...</div>;
+  if (isLoading) return <LoderComponent />;
   if (isError) return <div className="text-center py-10 text-red-600">Error loading jobs...</div>;
 
   const jobs = data || [];
