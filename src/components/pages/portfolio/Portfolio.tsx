@@ -1,68 +1,76 @@
 "use client";
-import React, { useState, useMemo, useCallback } from "react";
-import { Plus, Edit, Eye, Calendar, User } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import Image from "next/image";
+import { Plus, Edit, Eye, Calendar, Trash2 } from "lucide-react";
 import { Pagination } from "@/components/common/pagination";
 import Headers from "../../Reusable/Headers";
-import ReusableModal from "../../Reusable/ReusableModal";
+import AddEventModal from "@/components/Reusable/modalFeilds/AddEventForm";
+import EditEventModal from "@/components/Reusable/modalFeilds/EditEventForm";
 
 const PAGE_SIZE = 6;
 
-interface EventCardProps {
-  event: any;
-  onEdit: (event: any) => void;
-  onView: (event: any) => void;
+interface Event {
+  id: number;
+  image: string;
+  title: string;
+  subtitle: string;
+  content: string;
+  attendees: number;
 }
 
-const EventCard = React.memo<EventCardProps>(({ event, onEdit, onView }) => {
-  return (
-    <div className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-shadow duration-300 overflow-hidden">
-      <div className="relative h-48 overflow-hidden">
-        <img
-          src={event.image}
-          alt={event.title}
-          loading="lazy"
-          className="h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-        <div className="absolute top-4 left-4 flex gap-2">
-          <button
-            onClick={() => onEdit(event)}
-            className="bg-yellow-400 hover:bg-yellow-500 p-2 rounded-full shadow-lg"
-          >
-            <Edit className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onView(event)}
-            className="bg-white hover:bg-gray-100 p-2 rounded-full shadow-lg"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="absolute bottom-4 left-4 text-white text-sm">
-          <span className="font-semibold">{event.attendees}</span> attendees
-        </div>
+const EventCard = React.memo<{
+  event: Event;
+  onEdit: (event: Event) => void;
+  onView: (event: Event) => void;
+  onDelete: (id: number) => void;
+}>(({ event, onEdit, onView, onDelete }) => (
+  <div className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-shadow overflow-hidden">
+    <div className="relative h-48 overflow-hidden">
+      <Image src={event.image} alt={event.title} fill className="object-cover" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+      <div className="absolute top-4 left-4 flex gap-2">
+        <button
+          onClick={() => onEdit(event)}
+          className="bg-yellow-400 hover:bg-yellow-500 p-2 rounded-full shadow-lg"
+          title="Edit Event"
+        >
+          <Edit className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onView(event)}
+          className="bg-white hover:bg-gray-100 p-2 rounded-full shadow-lg"
+          title="View Event"
+        >
+          <Eye className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => onDelete(event.id)}
+          className="bg-red-500 hover:bg-red-600 p-2 rounded-full shadow-lg"
+          title="Delete Event"
+        >
+          <Trash2 className="w-4 h-4 text-white" />
+        </button>
       </div>
-
-      <div className="p-5 space-y-3">
-        <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
-          {event.title}
-        </h3>
-        <div className="flex items-center gap-2 text-sm text-gray-600">
-          <Calendar className="w-4 h-4 text-yellow-500" />
-          {event.subtitle}
-        </div>
-        <p className="text-sm text-gray-600 line-clamp-3">
-          {event.content}
-        </p>
+      <div className="absolute bottom-4 left-4 text-white text-sm font-medium">
+        <span className="font-semibold">{event.attendees}</span> attendees
       </div>
     </div>
-  );
-});
+
+    <div className="p-5 space-y-3">
+      <h3 className="text-lg font-bold text-gray-900 line-clamp-2">{event.title}</h3>
+      <div className="flex items-center gap-2 text-sm text-gray-600">
+        <Calendar className="w-4 h-4 text-yellow-500" />
+        {event.subtitle}
+      </div>
+      <p className="text-sm text-gray-600 line-clamp-3">{event.content}</p>
+    </div>
+  </div>
+));
+
+EventCard.displayName = "EventCard";
 
 const ManageEvents = () => {
-  const [events, setEvents] = useState([
+  const [events, setEvents] = useState<Event[]>([
     {
       id: 1,
       image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644",
@@ -77,97 +85,59 @@ const ManageEvents = () => {
       image: "https://images.unsplash.com/photo-1556761175-4b46a572b786",
       title: "Careers Beyond University",
       subtitle: "Thursday, July 10 • 5:30 PM UTC",
-      content:
-        "Explore career paths outside the traditional university route.",
+      content: "Explore career paths outside the traditional university route.",
       attendees: 89,
     },
-    {
-      id: 3,
-      image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4",
-      title: "Write a Standout Personal Statement",
-      subtitle: "Monday, July 18 • 4:00 PM UTC",
-      content:
-        "Learn how to showcase your skills and experiences effectively.",
-      attendees: 203,
-    },
-    {
-      id: 4,
-      image: "https://images.unsplash.com/photo-1507679799987-c73779587ccf",
-      title: "Apprenticeships vs University",
-      subtitle: "Friday, July 25 • 6:30 PM UTC",
-      content:
-        "Breaking down myths and facts to help you decide your future.",
-      attendees: 342,
-    },
-    {
-      id: 5,
-      image: "https://images.unsplash.com/photo-1497366216548-37526070297c",
-      title: "Digital Skills Bootcamp",
-      subtitle: "Wednesday, August 5 • 10:00 AM UTC",
-      content:
-        "Intensive digital training covering development and marketing.",
-      attendees: 45,
-    },
-    {
-      id: 6,
-      image: "https://images.unsplash.com/photo-1542744173-8e7e53415bb0",
-      title: "Industry Networking Mixer",
-      subtitle: "Saturday, August 15 • 7:00 PM UTC",
-      content:
-        "Connect with industry leaders and fellow apprentices.",
-      attendees: 120,
-    },
+    // add more dummy events if needed
   ]);
+  
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(PAGE_SIZE);
-  const [modalMode, setModalMode] = useState(null);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [itemsPerPage] = useState(PAGE_SIZE);
+
+  const [modalMode, setModalMode] = useState<"create" | "edit" | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   const paginatedEvents = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return events.slice(start, start + itemsPerPage);
   }, [events, currentPage, itemsPerPage]);
 
-  const openCreate = () => setModalMode("create");
+  const totalPages = Math.ceil(events.length / itemsPerPage);
 
-  const openEdit = useCallback((event) => {
+  const openCreate = () => {
+    setSelectedEvent(null);
+    setModalMode("create");
+  };
+
+  const openEdit = (event: Event) => {
     setSelectedEvent(event);
     setModalMode("edit");
-  }, []);
-
-  const openView = useCallback((event) => {
-    setSelectedEvent(event);
-    setModalMode("view");
-  }, []);
+  };
 
   const closeModal = () => {
     setModalMode(null);
     setSelectedEvent(null);
   };
 
-  const handleSave = useCallback((data) => {
-    console.log("Saved:", data);
-    closeModal();
-  }, []);
-
-  const totalItems = events.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
+  const handleDelete = (id: number) => {
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      setEvents((prev) => prev.filter((e) => e.id !== id));
+    }
+  };
 
   return (
-    <div className="">
+    <div>
       <div className="flex justify-between items-center mb-8">
         <Headers
-          title="Manage Portfolio"
+          title="Manage Events"
           subHeader="Create, edit, and monitor all upcoming events"
         />
         <button
           onClick={openCreate}
-          className="flex items-center gap-2 bg-[#FFFF00] hover:bg-yellow-500 px-6 py-3 rounded-xl font-semibold"
+          className="flex items-center gap-2 bg-yellow-400 hover:bg-yellow-500 px-6 py-3 rounded-xl font-semibold"
         >
-          <Plus className="w-4 h-4" /> Create Portfolio
+          <Plus className="w-4 h-4" /> Create Event
         </button>
       </div>
 
@@ -177,45 +147,37 @@ const ManageEvents = () => {
             key={event.id}
             event={event}
             onEdit={openEdit}
-            onView={openView}
+            onView={() => { }}
+            onDelete={handleDelete}
           />
         ))}
       </div>
 
-      <div className="flex justify-center mt-6">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          itemsPerPage={itemsPerPage}
-          totalItems={totalItems}
-          startIndex={startIndex}
-          endIndex={endIndex}
-          onPageChange={setCurrentPage}
-          onItemsPerPageChange={(val) => {
-            setItemsPerPage(val);
-            setCurrentPage(1);
-          }}
-        />
-      </div>
+      {events.length === 0 && (
+        <div className="text-center py-12 text-gray-500">
+          No events found. Create your first event!
+        </div>
+      )}
 
-      {modalMode && (
-        <ReusableModal
-          isOpen
-          onClose={closeModal}
-          onSave={handleSave}
-          location="portfolio"
-          edit={modalMode === "edit"}
-          view={modalMode === "view"}
-          data={selectedEvent}
-          title={
-            modalMode === "view"
-              ? "View Portfolio"
-              : modalMode === "edit"
-                ? "Edit Portfolio"
-                : "Create Portfolio"
-          }
-          submitText={modalMode === "edit" ? "Update" : "Create"}
-        />
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-10">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            totalItems={events.length}
+            startIndex={(currentPage - 1) * itemsPerPage}
+            endIndex={(currentPage - 1) * itemsPerPage + paginatedEvents.length}
+            onPageChange={setCurrentPage}
+            onItemsPerPageChange={() => { }}
+          />
+        </div>
+      )}
+
+      {/* MODALS */}
+      {modalMode === "create" && <AddEventModal open={true} setOpen={closeModal} />}
+      {modalMode === "edit" && selectedEvent && (
+        <EditEventModal open={true} setOpen={closeModal}  />
       )}
     </div>
   );

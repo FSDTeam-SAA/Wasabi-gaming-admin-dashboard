@@ -17,24 +17,6 @@ export async function addStudent(token: string, payload: { fullName: string, ema
 }
 
 
-export async function editFaq(token: string, payload: { title: string, description: string, }, id: string) {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/faq/${id}`, {
-        method: "PUT",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-            title: payload.title,
-            description: payload.description,
-        }),
-    });
-
-    const resData = await response.json();
-    if (!response.ok) throw new Error(resData.message || "Failed to ");
-    return resData;
-}
-
 export async function getAllStudents({ page, limit, year, search, token }: { page?: number; limit?: number, year?: string, search?: string, token?: string }) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/all-user?role=student&page=${page}&limit=${limit}&year=${year}&searchTerm=${search}`, {
         headers: {
@@ -63,14 +45,14 @@ export async function getAllStudents({ page, limit, year, search, token }: { pag
 // }
 
 export async function deleteStudent(token: string, id: string,) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${id}`, {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
 
-  const resData = await response.json();
-  if (!response.ok) throw new Error(resData.message || "Failed to delete students");
-  return resData;
+    const resData = await response.json();
+    if (!response.ok) throw new Error(resData.message || "Failed to delete students");
+    return resData;
 }
