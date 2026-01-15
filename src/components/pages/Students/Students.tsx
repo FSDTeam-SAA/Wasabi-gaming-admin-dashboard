@@ -83,7 +83,7 @@ const Students = () => {
                 <Headers title="Students" subHeader="Manage all students enrolled in your platform" />
                 <button
                     onClick={() => setOpen(true)}
-                    className="flex gap-2 items-center bg-[#FFFF00] py-2 rounded-3xl px-5 shadow-[0px_4px_6px_-4px_#0000001A,0px_10px_15px_-3px_#0000001A]"
+                    className="flex items-center gap-2 bg-[#FFFF00] hover:bg-yellow-500 py-3 px-6 rounded-xl shadow-sm hover:shadow-md transition-all font-semibold text-gray-900 disabled:opacity-60"
                 >
                     <MdPersonAddAlt1 size={18} /> Add Student
                 </button>
@@ -121,7 +121,7 @@ const Students = () => {
                     <Skeleton className="h-10 w-full mb-2" />
                 </div>
             ) : isError ? (
-                <div className="text-red-600 py-10 text-center">❌ Failed to load students</div>
+                <div className="text-red-600 py-10 text-center"> Failed to load students</div>
             ) : (
                 <div className="overflow-x-auto border rounded-lg">
                     <table className="w-full text-left text-sm">
@@ -179,7 +179,7 @@ const Students = () => {
                         totalResults={totalResults}
                         resultsPerPage={itemsPerPage}
                         onPageChange={setCurrentPage}
-                        
+
                     />
                 </div>
             )}
