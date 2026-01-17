@@ -97,7 +97,7 @@ const Dashboard = () => {
 
     const title = "Recent Students"
     const subtitle = "Manage and view all students enrolled in your platform"
-
+  
     return (
         <div className='  min-h-screen'>
 

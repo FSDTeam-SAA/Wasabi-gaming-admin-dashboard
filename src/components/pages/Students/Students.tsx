@@ -25,6 +25,7 @@ import {
     DialogDescription,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import LoderComponent from '@/components/loader/LoderComponent'
 
 const filterOptions = ['All', '9th', '10th', '11th', '12th']
 
@@ -47,6 +48,7 @@ const Students = () => {
         searchTerm || '',
         token
     )
+
 
     const deleteMutation = useStudentDelete(token)
     const addStudent = useAddStudent(token, () => setOpen(false))
@@ -76,7 +78,9 @@ const Students = () => {
 
         refetch()
     }
+    if (isLoading) return <LoderComponent />;
 
+    
     return (
         <div>
             <div className="flex justify-between items-center">
