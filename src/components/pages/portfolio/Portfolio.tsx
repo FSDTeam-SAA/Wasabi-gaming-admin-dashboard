@@ -11,7 +11,6 @@ import { useSession } from "next-auth/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-// shadcn/ui components for confirmation modal
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
 import LoderComponent from "@/components/loader/LoderComponent";
 
 const PAGE_SIZE = 6;
@@ -57,14 +57,14 @@ const EventCard = React.memo<{
     year: "numeric",
   });
 
-  const timeStr = event.time ? ` • ${event.time}` : "";
+  const timeStr = event?.time ? ` • ${event?.time}` : "";
 
   return (
     <div className="group bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-xl transition-shadow overflow-hidden">
       <div className="relative h-48 overflow-hidden">
         <Image
           src={imageSrc}
-          alt={event.title}
+          alt={event?.title}
           fill
           className="object-cover"
           unoptimized
@@ -105,7 +105,7 @@ const EventCard = React.memo<{
 
       <div className="p-5 space-y-3">
         <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
-          {event.title}
+          {event?.title}
         </h3>
 
         <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -115,12 +115,12 @@ const EventCard = React.memo<{
         </div>
 
         <p className="text-sm text-gray-600 line-clamp-3">
-          {event.description.replace(/<[^>]+>/g, "") || "No description available"}
+          {event?.description.replace(/<[^>]+>/g, "") || "No description available"}
         </p>
 
-        {event.eventType && (
+        {event?.eventType && (
           <div className="inline-block px-2.5 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-            {event.eventType}
+            {event?.eventType}
           </div>
         )}
       </div>
