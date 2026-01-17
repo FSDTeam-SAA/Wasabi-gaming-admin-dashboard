@@ -277,6 +277,7 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
         });
     };
 
+
     return (
         <div
             className={`w-full bg-white shadow-sm rounded-2xl p-5 border-2 flex flex-col gap-5 hover:shadow-md transition-all duration-200 cursor-pointer ${isSelected ? 'border-yellow-500' : 'border-gray-100'

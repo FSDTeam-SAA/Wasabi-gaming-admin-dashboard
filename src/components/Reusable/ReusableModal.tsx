@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import StudentForm from "./modalFeilds/StudentForm";
 import CourseFields from "./modalFeilds/VideoFields";
-import QuizFields from "./modalFeilds/QuizFeilds";
+// import QuizFields from "./modalFeilds/QuizFeilds";
 import TaskFields from "./modalFeilds/TaskFeilds";
 import ManageSchoolFeilds from "./modalFeilds/ManageSchoolFeilds";
 import ManageJobFeilds from "./modalFeilds/ManageJobFeilds";
@@ -88,10 +88,10 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
     switch (location) {
       case "student":
         return <StudentForm  formData={formData} onChange={handleChange} />;
-      case "quiz":
-        return (
-          <QuizFields formData={formData} onChange={handleChange} edit={edit} />
-        );
+      // case "quiz":
+      //   return (
+      //     <QuizFields formData={formData} onChange={handleChange} edit={edit} />
+      //   );
       case "course":
         return (
           <CourseFields
