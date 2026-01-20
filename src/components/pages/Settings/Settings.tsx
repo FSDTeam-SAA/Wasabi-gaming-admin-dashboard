@@ -1,61 +1,246 @@
-"use client";
-import React, { useRef, useState } from 'react';
-import Headers from "../../Reusable/Headers";
+'use client'
+import React, { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import Headers from '../../Reusable/Headers'
+import { toast } from 'sonner'
+
+// Import modular components
+import GeneralSettings from './components/GeneralSettings'
+import AccountSettings from './components/AccountSettings'
+import NotificationSettings from './components/NotificationSettings'
+import SecuritySettings from './components/SecuritySettings'
+
+// ============================================
+// TYPES
+// ============================================
+type TabType = 'general' | 'account' | 'notifications' | 'security'
+
+interface ProfileData {
+    firstName: string
+    lastName?: string
+    email: string
+    profileImage: string
+    schoolName?: string
+    address?: string
+    phone?: string
+}
 
 const Settings = () => {
-    const fileInputRef = useRef(null);
-    const [profileImage, setProfileImage] = useState(null);
-    const [imagePreview, setImagePreview] = useState(null);
-    const [fileName, setFileName] = useState("Upload your profile picture");
+    // ============================================
+    // STATE MANAGEMENT
+    // ============================================
+    const { data: sessionData } = useSession()
+    const token = sessionData?.user?.accessToken || ''
 
-    const handleUploadClick = () => {
-        // Trigger the hidden file input
-        fileInputRef.current.click();
-    };
+    // Tab state
+    const [activeTab, setActiveTab] = useState<TabType>('general')
 
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setProfileImage(file);
-            setFileName(file.name);
+    // Profile data state (centralized)
+    const [profileData, setProfileData] = useState<ProfileData>({
+        firstName: '',
+        lastName: '',
+        email: '',
+        profileImage: '',
+        schoolName: '',
+        address: '',
+        phone: '',
+    })
 
-            // Create preview URL
-            const previewUrl = URL.createObjectURL(file);
-            setImagePreview(previewUrl);
+    // Loading states
+    const [isLoading, setIsLoading] = useState(false)
+    const [isFetchingProfile, setIsFetchingProfile] = useState(true)
+
+    // Account tab - Image upload state
+    const [profileImage, setProfileImage] = useState<File | null>(null)
+    const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+    // General tab - Form state
+    const [generalForm, setGeneralForm] = useState({
+        schoolName: '',
+        address: '',
+        phone: '',
+    })
+
+    // Account tab - Form state
+    const [accountForm, setAccountForm] = useState({
+        firstName: '',
+        lastName: '',
+    })
+
+    // Notifications tab - Toggle state (UI only)
+    const [notificationSettings, setNotificationSettings] = useState({
+        emailNotifications: true,
+        pushNotifications: false,
+        weeklyReports: true,
+    })
+
+    // ============================================
+    // API CALLS
+    // ============================================
+
+    // Fetch profile data on component mount
+    useEffect(() => {
+        if (token) {
+            fetchProfile()
         }
-    };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [token])
 
-    const handleRemoveImage = () => {
-        setProfileImage(null);
-        setImagePreview(null);
-        setFileName("Upload your profile picture");
-        // Clear the file input
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
+    const fetchProfile = async () => {
+        try {
+            setIsFetchingProfile(true)
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/profile`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                },
+            )
+
+            const result = await response.json()
+
+            if (response.ok && result.data) {
+                const data = result.data
+
+                // Update centralized profile state
+                setProfileData({
+                    firstName: data.firstName || '',
+                    lastName: data.lastName || '',
+                    email: data.email || '',
+                    profileImage: data.profileImage || '',
+                    schoolName: data.schoolName || '',
+                    address: data.address || '',
+                    phone: data.phone || '',
+                })
+
+                // Prefill forms
+                setGeneralForm({
+                    schoolName: data.schoolName || '',
+                    address: data.address || '',
+                    phone: data.phone || '',
+                })
+
+                setAccountForm({
+                    firstName: data.firstName || '',
+                    lastName: data.lastName || '',
+                })
+
+                // Set image preview from API
+                if (data.profileImage) {
+                    setImagePreview(data.profileImage)
+                }
+            } else {
+                toast.error(result.message || 'Failed to fetch profile')
+            }
+        } catch (error) {
+            console.error('Error fetching profile:', error)
+            toast.error('Error loading profile data')
+        } finally {
+            setIsFetchingProfile(false)
         }
-    };
+    }
 
-    const handleUpdateAccount = () => {
-        // Handle form submission
-        if (profileImage) {
-            console.log('Uploading image:', profileImage);
-            // Here you would typically upload to your backend
-            // You can use FormData or your preferred method
-            const formData = new FormData();
-            formData.append('profileImage', profileImage);
+    // Update General Settings
+    const handleSaveGeneral = async () => {
+        try {
+            setIsLoading(true)
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/profile`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        schoolName: generalForm.schoolName,
+                        address: generalForm.address,
+                        phone: generalForm.phone,
+                    }),
+                },
+            )
 
-            // Example API call:
-            // axios.post('/api/upload-profile', formData, {
-            //     headers: {
-            //         'Content-Type': 'multipart/form-data'
-            //     }
-            // });
+            const result = await response.json()
+
+            if (response.ok) {
+                toast.success('General settings updated successfully')
+                // Refresh profile data
+                await fetchProfile()
+            } else {
+                toast.error(result.message || 'Failed to update settings')
+            }
+        } catch (error) {
+            console.error('Error updating general settings:', error)
+            toast.error('Error updating settings')
+        } finally {
+            setIsLoading(false)
         }
+    }
 
-        // Handle other form data updates
-        console.log('Updating account...');
-    };
+    // Update Account (with profile image)
+    const handleUpdateAccount = async () => {
+        try {
+            setIsLoading(true)
+            const formData = new FormData()
 
+            // Add profile image if uploaded
+            if (profileImage) {
+                formData.append('profileImage', profileImage)
+            }
+
+            // Add account data as JSON string
+            const accountData = {
+                firstName: accountForm.firstName,
+                lastName: accountForm.lastName,
+            }
+            formData.append('data', JSON.stringify(accountData))
+
+            const response = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL}/user/profile/`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: formData,
+                },
+            )
+
+            const result = await response.json()
+
+            if (response.ok) {
+                toast.success('Account updated successfully')
+                // Refresh profile data
+                await fetchProfile()
+                // Clear uploaded image state
+                setProfileImage(null)
+            } else {
+                toast.error(result.message || 'Failed to update account')
+            }
+        } catch (error) {
+            console.error('Error updating account:', error)
+            toast.error('Error updating account')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    // ============================================
+    // TABS COMPONENT
+    // ============================================
+    const tabs: { id: TabType; label: string }[] = [
+        { id: 'general', label: 'General' },
+        { id: 'account', label: 'Account' },
+        { id: 'notifications', label: 'Notifications' },
+        { id: 'security', label: 'Security' },
+    ]
+
+    // ============================================
+    // MAIN RENDER
+    // ============================================
     return (
         <div className="min-h-screen">
             <Headers
@@ -64,142 +249,68 @@ const Settings = () => {
             />
 
             <div className="max-w-8xl mx-auto mt-1">
-                {/* Account Content - Directly displayed without tabs */}
-                <div className="bg-white rounded-[20px] shadow-sm p-6">
-                    <h3 className="text-lg popbold text-gray-900">Account Details</h3>
-                    <p className="text-[16px] text-[#737373] mt-1">Manage your account information</p>
+                {/* Tabs Navigation */}
+                <div className="flex space-x-2 mb-6">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-6 py-2 rounded-full text-sm font-medium popmed transition-colors ${activeTab === tab.id
+                                    ? 'bg-white text-gray-900 shadow-sm'
+                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
 
-                    <div className="mt-6 space-y-5">
-                        {/* Profile Image Preview and Upload */}
-                        <div className="flex items-center space-x-4 mb-4">
-                            {imagePreview && (
-                                <div className="relative">
-                                    <img
-                                        src={imagePreview}
-                                        alt="Profile preview"
-                                        className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={handleRemoveImage}
-                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-                                    >
-                                        ×
-                                    </button>
-                                </div>
-                            )}
-
-                            <div className="flex-1">
-                                <label className="block text-sm font-medium popmed text-gray-700 mb-2">
-                                    Profile Picture
-                                </label>
-
-                                <div className="flex items-center space-x-3">
-                                    <input
-                                        type="text"
-                                        value={fileName}
-                                        readOnly
-                                        className="flex-1 popreg rounded-md border-gray-300 bg-gray-50 shadow-sm sm:text-sm h-10 px-3 border cursor-not-allowed"
-                                    />
-
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        onChange={handleFileChange}
-                                        accept="image/*"
-                                        className="hidden"
-                                    />
-
-                                    <button
-                                        type="button"
-                                        onClick={handleUploadClick}
-                                        className="p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                                    >
-                                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <p className="mt-2 text-xs text-gray-500">
-                                    Supported formats: JPG, PNG, GIF. Max size: 5MB
-                                </p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block font-medium text-sm popmed text-gray-700">Full Name</label>
-                            <input
-                                type="text"
-                                defaultValue="Admin User"
-                                className="mt-1 block w-full popreg rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-10 px-3 border"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-medium popmed text-gray-700">Email Address</label>
-                            <input
-                                type="email"
-                                defaultValue="admin@aspiring.edu"
-                                className="mt-1 popreg block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-10 px-3 border"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm text-sm popmed font-medium text-gray-700">Phone</label>
-                                <input
-                                    type="text"
-                                    defaultValue="+1 (555) 123-4567"
-                                    className="mt-1 block popreg w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-10 px-3 border"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm  popmed font-medium text-gray-700">Address</label>
-                                <input
-                                    type="text"
-                                    defaultValue="123 Education Street"
-                                    className="mt-1 block w-full popreg rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-10 px-3 border"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="border-t pt-5">
-                            <label className="block text-sm font-medium popmed text-gray-700">Current Password</label>
-                            <input
-                                type="password"
-                                className="mt-1 block w-full popreg rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-10 px-3 border"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-sm font-medium popmed text-gray-700">New Password</label>
-                                <input
-                                    type="password"
-                                    className="mt-1 block popreg w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-10 px-3 border"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm popmed font-medium text-gray-700">Confirm Password</label>
-                                <input
-                                    type="password"
-                                    className="mt-1 block w-full popreg rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm h-10 px-3 border"
-                                />
-                            </div>
+                {/* Tab Content */}
+                {isFetchingProfile ? (
+                    <div className="bg-white rounded-xl shadow-sm p-6 flex items-center justify-center h-64">
+                        <div className="text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+                            <p className="mt-4 text-gray-600">Loading profile...</p>
                         </div>
                     </div>
-
-                    <button
-                        onClick={handleUpdateAccount}
-                        className="mt-6 bg-[#FFFF00] hover:bg-yellow-500 text-black font-medium py-2 px-6 rounded-full transition-colors"
-                    >
-                        Update Account
-                    </button>
-                </div>
+                ) : (
+                    <>
+                        {activeTab === 'general' && (
+                            <GeneralSettings
+                                generalForm={generalForm}
+                                setGeneralForm={setGeneralForm}
+                                isLoading={isLoading}
+                                onSave={handleSaveGeneral}
+                            />
+                        )}
+                        {activeTab === 'account' && (
+                            <AccountSettings
+                                accountForm={accountForm}
+                                setAccountForm={setAccountForm}
+                                profileData={{
+                                    email: profileData.email,
+                                    profileImage: profileData.profileImage,
+                                }}
+                                profileImage={profileImage}
+                                setProfileImage={setProfileImage}
+                                imagePreview={imagePreview}
+                                setImagePreview={setImagePreview}
+                                isLoading={isLoading}
+                                onUpdate={handleUpdateAccount}
+                            />
+                        )}
+                        {activeTab === 'notifications' && (
+                            <NotificationSettings
+                                notificationSettings={notificationSettings}
+                                setNotificationSettings={setNotificationSettings}
+                            />
+                        )}
+                        {activeTab === 'security' && <SecuritySettings token={token} />}
+                    </>
+                )}
             </div>
         </div>
-    );
-};
+    )
+}
 
-export default Settings;
+export default Settings
