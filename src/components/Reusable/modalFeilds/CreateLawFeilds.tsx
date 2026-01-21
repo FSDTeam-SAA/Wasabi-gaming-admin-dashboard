@@ -1,567 +1,31 @@
-// /* eslint-disable react-hooks/exhaustive-deps */
-// "use client";
-// import React, { useState, useEffect } from "react";
-// import {
-//   Camera,
-//   MapPin,
-//   Users,
-//   Calendar,
-//   Award,
-//   Briefcase,
-// } from "lucide-react";
-// import { FaBuilding, FaGraduationCap } from "react-icons/fa6";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-// import { Textarea } from "@/components/ui/textarea";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-// import Image from "next/image";
-
-// interface CreateLawFeildsProps {
-//   formData: any;
-//   onChange: (field: string, value: any) => void;
-//   edit?: boolean;
-//   view?: boolean;
-//   job?: any;
-//   onClose?: () => void;
-// }
-
-// const CreateLawFields: React.FC<CreateLawFeildsProps> = ({
-//   formData,
-//   onChange,
-//   edit = false,
-//   view = false,
-//   job: firm,
-//   onClose,
-// }) => {
-//   const disabled = view;
-//   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-
-//   useEffect(() => {
-//     let objectUrl: string | null = null;
-
-//     if (formData.logo && formData.logo instanceof File) {
-//       objectUrl = URL.createObjectURL(formData.logo);
-//       setLogoPreview(objectUrl);
-//     } else if (formData.logo && typeof formData.logo === "string") {
-//       setLogoPreview(formData.logo);
-//     } else {
-//       setLogoPreview(null);
-//     }
-
-//     return () => {
-//       if (objectUrl) {
-//         URL.revokeObjectURL(objectUrl);
-//       }
-//     };
-//   }, [formData.logo]);
-
-//   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const file = e.target.files?.[0];
-//     if (file) {
-//       onChange("logo", file);
-//     }
-//   };
-
-//   useEffect(() => {
-//     return () => {
-//       if (logoPreview && logoPreview.startsWith("blob:")) {
-//         URL.revokeObjectURL(logoPreview);
-//       }
-//     };
-//   }, []);
-
-//   const getFirmSizeLabel = (size: string) => {
-//     const sizeMap: Record<string, string> = {
-//       Small: "2-10 lawyers",
-//       Medium: "11-50 lawyers",
-//       Large: "51-200 lawyers",
-//       Enterprise: "200+ lawyers",
-//     };
-//     return sizeMap[size] || size;
-//   };
-
-//   if (view) {
-//     return (
-//       <div className="space-y-6">
-//         <div className="pb-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-md p-6">
-//           <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-//             <div className="flex-shrink-0">
-//               <div className="h-24 w-24 rounded-xl bg-white shadow-lg border border-gray-200 flex items-center justify-center overflow-hidden">
-//                 {firm.logo ? (
-//                   <Image
-//                     width={300}
-//                     height={300}
-//                     src={firm.logo}
-//                     alt={`${firm.name} logo`}
-//                     className="h-full w-full object-cover"
-//                   />
-//                 ) : (
-//                   <FaBuilding className="text-gray-400" size={40} />
-//                 )}
-//               </div>
-//             </div>
-
-//             <div className="flex-1">
-//               <h1 className="text-2xl font-bold text-gray-900 mb-1">
-//                 {firm.name}
-//               </h1>
-//               <p className="text-lg text-gray-600 mb-3">
-//                 {firm.tagline || "Prestigious legal services provider"}
-//               </p>
-
-//               <div className="flex flex-wrap gap-4">
-//                 <div className="flex items-center gap-2 text-sm text-gray-600">
-//                   <MapPin className="w-4 h-4" />
-//                   <span>{firm.location || "Multiple locations"}</span>
-//                 </div>
-//                 <div className="flex items-center gap-2 text-sm text-gray-600">
-//                   <Users className="w-4 h-4" />
-//                   <span>{getFirmSizeLabel(firm.size)}</span>
-//                 </div>
-//                 <div className="flex items-center gap-2 text-sm text-gray-600">
-//                   <Calendar className="w-4 h-4" />
-//                   <span>Est. {firm.yearFounded || "1980"}</span>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="pb-6 border-b border-gray-200">
-//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-//             <div className="bg-gray-50 p-4 rounded-lg">
-//               <div className="flex items-center gap-3 mb-2">
-//                 <div className="p-2 bg-blue-100 rounded-lg">
-//                   <Briefcase className="w-5 h-5 text-blue-600" />
-//                 </div>
-//                 <div>
-//                   <p className="text-sm text-muted-foreground">
-//                     Practice Areas
-//                   </p>
-//                   <p className="font-semibold text-gray-900">
-//                     {firm.tags?.length || 8}+
-//                   </p>
-//                 </div>
-//               </div>
-//             </div>
-
-//             <div className="bg-gray-50 p-4 rounded-lg">
-//               <div className="flex items-center gap-3 mb-2">
-//                 <div className="p-2 bg-green-100 rounded-lg">
-//                   <Users className="w-5 h-5 text-green-600" />
-//                 </div>
-//                 <div>
-//                   <p className="text-sm text-muted-foreground">Partners</p>
-//                   <p className="font-semibold text-gray-900">
-//                     {Math.floor(
-//                       firm.size === "Large" || firm.size === "Enterprise"
-//                         ? 25
-//                         : 12
-//                     )}
-//                   </p>
-//                 </div>
-//               </div>
-//             </div>
-
-//             <div className="bg-gray-50 p-4 rounded-lg">
-//               <div className="flex items-center gap-3 mb-2">
-//                 <div className="p-2 bg-purple-100 rounded-lg">
-//                   <FaGraduationCap className="w-5 h-5 text-purple-600" />
-//                 </div>
-//                 <div>
-//                   <p className="text-sm text-muted-foreground">
-//                     Training Contracts
-//                   </p>
-//                   <p className="font-semibold text-gray-900">
-//                     {firm.internships || "Summer & Graduate"}
-//                   </p>
-//                 </div>
-//               </div>
-//             </div>
-
-//             <div className="bg-gray-50 p-4 rounded-lg">
-//               <div className="flex items-center gap-3 mb-2">
-//                 <div className="p-2 bg-amber-100 rounded-lg">
-//                   <Award className="w-5 h-5 text-amber-600" />
-//                 </div>
-//                 <div>
-//                   <p className="text-sm text-muted-foreground">Rankings</p>
-//                   <p className="font-semibold text-gray-900">Top 100 UK</p>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="space-y-6">
-//           <section>
-//             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-//               <span className="w-1 h-6 bg-blue-600 rounded-full"></span>
-//               About the Firm
-//             </h3>
-//             <div className="prose max-w-none text-gray-700">
-//               <p className="mb-4">
-//                 <strong className="text-gray-900">{firm.name}</strong>{" "}
-//                 {firm.about ||
-//                   "is a leading law firm with a reputation for excellence in legal services. With decades of experience and a team of dedicated professionals, we provide comprehensive legal solutions to clients across various sectors."}
-//               </p>
-//               <p>
-//                 {firm.description ||
-//                   "Our firm combines traditional legal expertise with innovative approaches to meet the evolving needs of our clients. We pride ourselves on delivering exceptional results while maintaining the highest standards of professionalism and ethical conduct."}
-//               </p>
-//             </div>
-//           </section>
-
-//           <section>
-//             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-//               <span className="w-1 h-6 bg-green-600 rounded-full"></span>
-//               Areas of Expertise
-//             </h3>
-//             <div className="flex flex-wrap gap-2">
-//               {firm.tags?.map((tag: string, index: number) => (
-//                 <span
-//                   key={index}
-//                   className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-100"
-//                 >
-//                   {tag}
-//                 </span>
-//               ))}
-//               {(!firm.tags || firm.tags.length === 0) && (
-//                 <>
-//                   <span className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-100">
-//                     Corporate Law
-//                   </span>
-//                   <span className="px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-sm font-medium border border-green-100">
-//                     Commercial Litigation
-//                   </span>
-//                   <span className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-full text-sm font-medium border border-purple-100">
-//                     Intellectual Property
-//                   </span>
-//                   <span className="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full text-sm font-medium border border-amber-100">
-//                     Employment Law
-//                   </span>
-//                   <span className="px-3 py-1.5 bg-red-50 text-red-700 rounded-full text-sm font-medium border border-red-100">
-//                     Real Estate
-//                   </span>
-//                   <span className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-100">
-//                     Mergers & Acquisitions
-//                   </span>
-//                 </>
-//               )}
-//             </div>
-//           </section>
-
-//           <section>
-//             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-//               <span className="w-1 h-6 bg-purple-600 rounded-full"></span>
-//               Training & Career Development
-//             </h3>
-//             <div className="space-y-3">
-//               <div className="flex items-start gap-3">
-//                 <div className="p-2 bg-purple-100 rounded-lg mt-1">
-//                   <FaGraduationCap className="w-5 h-5 text-purple-600" />
-//                 </div>
-//                 <div>
-//                   <h4 className="font-medium text-gray-900 mb-1">
-//                     Training Programs
-//                   </h4>
-//                   <p className="text-gray-600">
-//                     {firm.internships ||
-//                       "Our firm offers comprehensive training contracts, vacation schemes, and graduate programs designed to develop the next generation of legal professionals."}
-//                   </p>
-//                 </div>
-//               </div>
-//               <div className="flex items-start gap-3">
-//                 <div className="p-2 bg-blue-100 rounded-lg mt-1">
-//                   <Users className="w-5 h-5 text-blue-600" />
-//                 </div>
-//                 <div>
-//                   <h4 className="font-medium text-gray-900 mb-1">Mentorship</h4>
-//                   <p className="text-gray-600">
-//                     One-on-one mentorship from senior partners and regular
-//                     performance reviews to support career progression.
-//                   </p>
-//                 </div>
-//               </div>
-//             </div>
-//           </section>
-
-//           <section>
-//             <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-//               <span className="w-1 h-6 bg-amber-600 rounded-full"></span>
-//               Firm Culture & Values
-//             </h3>
-//             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//               <div className="bg-gray-50 p-4 rounded-lg">
-//                 <h4 className="font-medium text-gray-900 mb-2">Excellence</h4>
-//                 <p className="text-sm text-gray-600">
-//                   Commitment to the highest standards of legal practice and
-//                   client service.
-//                 </p>
-//               </div>
-//               <div className="bg-gray-50 p-4 rounded-lg">
-//                 <h4 className="font-medium text-gray-900 mb-2">Integrity</h4>
-//                 <p className="text-sm text-gray-600">
-//                   Upholding ethical standards and maintaining client
-//                   confidentiality.
-//                 </p>
-//               </div>
-//               <div className="bg-gray-50 p-4 rounded-lg">
-//                 <h4 className="font-medium text-gray-900 mb-2">
-//                   Collaboration
-//                 </h4>
-//                 <p className="text-sm text-gray-600">
-//                   Team-oriented approach to complex legal challenges.
-//                 </p>
-//               </div>
-//               <div className="bg-gray-50 p-4 rounded-lg">
-//                 <h4 className="font-medium text-gray-900 mb-2">Innovation</h4>
-//                 <p className="text-sm text-gray-600">
-//                   Embracing technology and new approaches to legal practice.
-//                 </p>
-//               </div>
-//             </div>
-//           </section>
-
-//           <section className="pt-4 border-t border-gray-200">
-//             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-//               Additional Information
-//             </h3>
-//             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//               <div>
-//                 <h4 className="font-medium text-gray-900 mb-2">
-//                   Office Locations
-//                 </h4>
-//                 <p className="text-gray-600">
-//                   {firm.location ||
-//                     "London (Headquarters), Manchester, Edinburgh"}
-//                 </p>
-//               </div>
-//               <div>
-//                 <h4 className="font-medium text-gray-900 mb-2">
-//                   Recruitment Contact
-//                 </h4>
-//                 <p className="text-gray-600">
-//                   recruitment@
-//                   {firm.name?.toLowerCase().replace(/\s+/g, "") || "firm"}.com
-//                 </p>
-//               </div>
-//             </div>
-//           </section>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   // Edit/Create Mode
-//   return (
-//     <div className="space-y-6 pr-4">
-//       <div>
-//         <h2 className="text-xl font-semibold text-gray-900">
-//           {edit ? "Edit Law Firm" : "Create Law Firm"}
-//         </h2>
-//         <p className="text-sm text-muted-foreground">
-//           {edit ? "Update law firm information" : "Add new law firm details"}
-//         </p>
-//       </div>
-
-//       <div className="flex items-center gap-4">
-//         <div className="relative">
-//           <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
-//             {logoPreview ? (
-//               <Image
-//                 width={300}
-//                 height={300}
-//                 src={logoPreview}
-//                 alt="Logo preview"
-//                 className="h-full w-full object-cover"
-//               />
-//             ) : formData.logo && typeof formData.logo === "string" ? (
-//               <Image
-//                 width={300}
-//                 height={300}
-//                 src={formData.logo}
-//                 alt="Logo"
-//                 className="h-full w-full object-cover"
-//               />
-//             ) : (
-//               <Camera className="text-blue-600" />
-//             )}
-//           </div>
-
-//           {!view && (
-//             <input
-//               type="file"
-//               accept="image/*"
-//               className="absolute inset-0 opacity-0 cursor-pointer"
-//               onChange={handleLogoChange}
-//               id="logo-upload"
-//             />
-//           )}
-//         </div>
-
-//         <div>
-//           <Label
-//             htmlFor="logo-upload"
-//             className="text-sm text-gray-600 cursor-pointer hover:text-gray-900"
-//           >
-//             {logoPreview || formData.logo ? "Change logo" : "Add logo"}
-//           </Label>
-//           <p className="text-xs text-muted-foreground mt-1">
-//             Recommended: 200×200px PNG/JPG
-//           </p>
-//         </div>
-//       </div>
-
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//         <div className="space-y-2">
-//           <Label>Firm Name</Label>
-//           <Input
-//             type="text"
-//             placeholder="Enter firm name"
-//             value={formData.name || ""}
-//             disabled={disabled}
-//             onChange={(e) => onChange("name", e.target.value)}
-//           />
-//         </div>
-
-//         <div className="space-y-2">
-//           <Label>Tagline</Label>
-//           <Input
-//             type="text"
-//             placeholder="Brief description or tagline"
-//             value={formData.tagline || ""}
-//             disabled={disabled}
-//             onChange={(e) => onChange("tagline", e.target.value)}
-//           />
-//         </div>
-//       </div>
-
-//       <div className="space-y-2">
-//         <Label>About the Firm</Label>
-//         <Textarea
-//           rows={3}
-//           placeholder="Brief overview of the firm's history, values, and mission"
-//           value={formData.aboutFirm || ""}
-//         //   disabled={disabled}
-//           onChange={(e) => onChange("about", e.target.value)}
-//           className="resize-none"
-//         />
-//       </div>
-
-//       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-//         <div className="space-y-2">
-//           <Label>Firm Size</Label>
-//           <Select
-//             value={formData.size || ""}
-//             onValueChange={(value) => onChange("size", value)}
-//             disabled={disabled}
-//           >
-//             <SelectTrigger>
-//               <SelectValue placeholder="Select firm size" />
-//             </SelectTrigger>
-//             <SelectContent>
-//               <SelectItem value="Small">Small (2-10 lawyers)</SelectItem>
-//               <SelectItem value="Medium">Medium (11-50 lawyers)</SelectItem>
-//               <SelectItem value="Large">Large (51-200 lawyers)</SelectItem>
-//               <SelectItem value="Enterprise">
-//                 Enterprise (200+ lawyers)
-//               </SelectItem>
-//             </SelectContent>
-//           </Select>
-//         </div>
-
-//         <div className="space-y-2">
-//           <Label>Year Founded</Label>
-//           <Input
-//             type="text"
-//             placeholder="e.g., 1980"
-//             value={formData.yearFounded || ""}
-//             disabled={disabled}
-//             onChange={(e) => onChange("yearFounded", e.target.value)}
-//           />
-//         </div>
-//       </div>
-
-//       <div className="space-y-2">
-//         <Label>Areas of Expertise (comma-separated)</Label>
-//         <Input
-//           type="text"
-//           placeholder="Corporate Law, Commercial Litigation, Intellectual Property"
-//           value={formData.expertise || ""}
-//           disabled={disabled}
-//           onChange={(e) => onChange("expertise", e.target.value)}
-//         />
-//         <p className="text-xs text-muted-foreground mt-1">
-//           Separate each practice area with a comma
-//         </p>
-//       </div>
-
-//       <div className="space-y-2">
-//         <Label>Training Programs Offered</Label>
-//         <Input
-//           type="text"
-//           placeholder="Training contracts, Vacation schemes, Graduate programs"
-//           value={formData.internships || ""}
-//           disabled={disabled}
-//           onChange={(e) => onChange("internships", e.target.value)}
-//         />
-//       </div>
-
-//       <div className="space-y-2">
-//         <Label>Office Locations</Label>
-//         <Input
-//           type="text"
-//           placeholder="London, Manchester, Edinburgh"
-//           value={formData.location || ""}
-//           disabled={disabled}
-//           onChange={(e) => onChange("location", e.target.value)}
-//         />
-//       </div>
-
-//       <div className="space-y-2">
-//         <Label>Detailed Description</Label>
-//         <Textarea
-//           rows={5}
-//           placeholder="Detailed information about the firm's practice areas, culture, achievements, and values"
-//           value={formData.description || ""}
-//           disabled={disabled}
-//           onChange={(e) => onChange("description", e.target.value)}
-//           className="resize-none"
-//         />
-//       </div>
-
-//       {edit && formData.logo && typeof formData.logo === "string" && (
-//         <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-//           <p className="text-sm text-gray-600 mb-2">Current logo:</p>
-//           <Image
-//             width={300}
-//             height={300}
-//             src={formData.logo}
-//             alt="Current logo"
-//             className="h-16 w-16 rounded-full object-cover border border-gray-200"
-//           />
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default CreateLawFields;
-
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import React, { useState, useEffect } from "react";
-import { Camera, MapPin, Users } from "lucide-react";
-import { FaBuilding, FaGraduationCap } from "react-icons/fa6";
+import {
+  MapPin,
+  Users,
+  Calendar,
+  Upload,
+  Plus,
+  X,
+  Mail,
+  Phone,
+  Globe,
+  Building,
+} from "lucide-react";
+import { FaBuilding } from "react-icons/fa6";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 
 interface CreateLawFeildsProps {
@@ -569,308 +33,494 @@ interface CreateLawFeildsProps {
   onChange: (field: string, value: any) => void;
   edit?: boolean;
   view?: boolean;
-  job?: any;
+  job?: any;          // ← real firm data comes here in view / edit mode
   onClose?: () => void;
 }
 
 const CreateLawFields: React.FC<CreateLawFeildsProps> = ({
-  formData,
+  formData = {},
   onChange,
   edit = false,
   view = false,
-  job: firm,
-  onClose,
+  job,                // ← this is the actual firm object in view/edit
 }) => {
   const disabled = view;
+
+  // Use job (real data) in view / edit mode, otherwise use formData (create mode)
+  const currentData = view || edit ? job || {} : formData;
+
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Tags
+  const [tags, setTags] = useState<string[]>([]);
+  const [currentTag, setCurrentTag] = useState("");
+
+  // Internship Opportunities
+  const [internshipOpportunities, setInternshipOpportunities] = useState<string[]>([]);
+  const [currentOpportunity, setCurrentOpportunity] = useState("");
+
+  // Load data only when firm changes (very important → prevents infinite loop)
   useEffect(() => {
-    let objectUrl: string | null = null;
+    if (!currentData?._id) return;
 
-    if (formData.logo && formData.logo instanceof File) {
-      objectUrl = URL.createObjectURL(formData.logo);
-      setLogoPreview(objectUrl);
-    } else if (formData.logo && typeof formData.logo === "string") {
-      setLogoPreview(formData.logo);
-    } else {
-      setLogoPreview(null);
+    // Logo / Cover preview
+    if (currentData.coverImage) {
+      setLogoPreview(currentData.coverImage);
     }
 
-    return () => {
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
-    };
-  }, [formData.logo]);
+    // Tags
+    if (Array.isArray(currentData.tags)) {
+      setTags(currentData.tags);
+    }
+
+    // Internship Opportunities
+    if (Array.isArray(currentData.internshipOpportunities)) {
+      setInternshipOpportunities(currentData.internshipOpportunities);
+    }
+
+  }, [currentData?._id]); // ← only run when the firm ID changes
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      onChange("logo", file);
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors({ ...errors, coverImage: "File size must be less than 5MB" });
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      setErrors({ ...errors, coverImage: "Please upload an image file" });
+      return;
+    }
+
+    setErrors({ ...errors, coverImage: "" });
+    onChange("coverImage", file);
+  };
+
+  const addItem = (
+    items: string[],
+    setItems: React.Dispatch<React.SetStateAction<string[]>>,
+    input: string,
+    setInput: React.Dispatch<React.SetStateAction<string>>,
+    field: string
+  ) => {
+    const trimmed = input.trim();
+    if (!trimmed || disabled) return;
+
+    const updated = [...items, trimmed];
+    setItems(updated);
+    onChange(field, updated);
+    setInput("");
+  };
+
+  const removeItem = (
+    index: number,
+    items: string[],
+    setItems: React.Dispatch<React.SetStateAction<string[]>>,
+    field: string
+  ) => {
+    if (disabled) return;
+    const updated = items.filter((_, i) => i !== index);
+    setItems(updated);
+    onChange(field, updated);
+  };
+
+  const handleKeyPress = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    addFn: () => void
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addFn();
     }
   };
 
-  // Parse expertise to tags array
-  const parseExpertise = (expertise: string) => {
-    if (!expertise) return [];
-    return expertise.split(",").map((tag) => tag.trim());
-  };
-
+  // ──────────────────────────────
+  //        VIEW MODE (Beautiful)
+  // ──────────────────────────────
   if (view) {
-    const tags = parseExpertise(firm?.exertise || "");
-
     return (
-      <div className="space-y-6">
-        <div className="pb-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-md p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-            <div className="flex-shrink-0">
-              <div className="h-24 w-24 rounded-xl bg-white shadow-lg border border-gray-200 flex items-center justify-center overflow-hidden">
-                {firm?.logo ? (
-                  <Image
-                    width={300}
-                    height={300}
-                    src={firm.logo}
-                    alt="Law Firm logo"
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <FaBuilding className="text-gray-400" size={40} />
-                )}
-              </div>
+      <div className="space-y-8 pb-6">
+        {/* Hero / Header */}
+        <div className="relative rounded-2xl overflow-hidden shadow-lg">
+          {currentData.coverImage ? (
+            <div className="relative h-64 md:h-80">
+              <img
+                src={currentData.coverImage}
+                alt="Cover"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
             </div>
+          ) : (
+            <div className="h-64 md:h-80 bg-gradient-to-br from-blue-900 to-indigo-900 flex items-center justify-center">
+              <Building size={120} className="text-white/30" />
+            </div>
+          )}
 
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-1">
-                {firm?.aboutFirm || "Law Firm"}
-              </h1>
-              <p className="text-lg text-gray-600 mb-3">
-                {firm?.description || "Professional legal services provider"}
-              </p>
+          <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+            <h1 className="text-4xl md:text-5xl font-bold drop-shadow-lg">
+              {currentData.firmName || "Law Firm"}
+            </h1>
 
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <MapPin className="w-4 h-4" />
-                  <span>{firm?.location || "Multiple locations"}</span>
+            <div className="flex flex-wrap gap-4 mt-4">
+              {currentData.location && (
+                <div className="flex items-center gap-2 text-lg">
+                  <MapPin size={20} /> {currentData.location}
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Users className="w-4 h-4" />
-                  <span>{firm?.applyNumber?.length || 0} Applications</span>
+              )}
+              {currentData.numberOfAttorneys != null && (
+                <div className="flex items-center gap-2 text-lg">
+                  <Users size={20} /> {currentData.numberOfAttorneys} Attorneys
                 </div>
-              </div>
+              )}
+              {currentData.foundationYear && (
+                <div className="flex items-center gap-2 text-lg">
+                  <Calendar size={20} /> Founded {currentData.foundationYear}
+                </div>
+              )}
+              {currentData.status && (
+                <Badge
+                  className={
+                    currentData.status === "featured"
+                      ? "bg-yellow-400 text-black text-lg px-4 py-1"
+                      : currentData.status === "pending"
+                      ? "bg-orange-500 text-white text-lg px-4 py-1"
+                      : "bg-gray-700 text-white text-lg px-4 py-1"
+                  }
+                >
+                  {currentData.status.toUpperCase()}
+                </Badge>
+              )}
             </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          <section>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-1 h-6 bg-blue-600 rounded-full"></span>
-              About the Firm
-            </h3>
-            <div className="prose max-w-none text-gray-700">
-              <p className="mb-4">
-                <strong className="text-gray-900">{firm?.aboutFirm}</strong>
-              </p>
-              <p>{firm?.description}</p>
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-1 h-6 bg-green-600 rounded-full"></span>
-              Areas of Expertise
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {tags.length > 0 ? (
-                tags.map((tag: string, index: number) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-100"
-                  >
-                    {tag}
-                  </span>
-                ))
-              ) : (
-                <span className="text-gray-500 text-sm">
-                  No expertise areas specified
-                </span>
-              )}
-            </div>
-          </section>
-
-          <section>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <span className="w-1 h-6 bg-purple-600 rounded-full"></span>
-              Training & Internship Programs
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-purple-100 rounded-lg mt-1">
-                  <FaGraduationCap className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-1">
-                    Training Programs
-                  </h4>
-                  <p className="text-gray-600">
-                    {firm?.internshipTraining ||
-                      "No training program information available"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="pt-4 border-t border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Contact Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Main Content */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Left Column */}
+          <div className="space-y-8">
+            {currentData.aboutFirm && (
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">
-                  Office Location
-                </h4>
-                <p className="text-gray-600">
-                  {firm?.location || "Location not specified"}
+                <h3 className="text-2xl font-bold mb-3">About the Firm</h3>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-line">
+                  {currentData.aboutFirm}
                 </p>
               </div>
+            )}
+
+            {currentData.keyHighlights && (
               <div>
-                <h4 className="font-medium text-gray-900 mb-2">Status</h4>
-                <p className="text-gray-600 capitalize">
-                  {firm?.status || "Pending"}
-                </p>
+                <h3 className="text-2xl font-bold mb-3">Key Highlights</h3>
+                <p className="text-gray-700">{currentData.keyHighlights}</p>
               </div>
-            </div>
-          </section>
+            )}
+
+            {currentData.internshipOpportunities?.length > 0 && (
+              <div>
+                <h3 className="text-2xl font-bold mb-3">Internship Opportunities</h3>
+                <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                  {currentData.internshipOpportunities.map((item: string, i: number) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-8">
+            {currentData.tags?.length > 0 && (
+              <div>
+                <h3 className="text-2xl font-bold mb-3">Tags / Expertise</h3>
+                <div className="flex flex-wrap gap-2">
+                  {currentData.tags.map((tag: string, i: number) => (
+                    <Badge key={i} variant="outline" className="text-base px-4 py-1.5">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(currentData.website || currentData.email || currentData.phoneNumber) && (
+              <div>
+                <h3 className="text-2xl font-bold mb-4">Contact Information</h3>
+                <div className="space-y-4 text-lg">
+                  {currentData.website && (
+                    <a
+                      href={currentData.website.startsWith("http") ? currentData.website : `https://${currentData.website}`}
+                      target="_blank"
+                      className="flex items-center gap-3 text-blue-600 hover:underline"
+                    >
+                      <Globe size={22} />
+                      {currentData.website}
+                    </a>
+                  )}
+                  {currentData.email && (
+                    <div className="flex items-center gap-3">
+                      <Mail size={22} className="text-gray-600" />
+                      {currentData.email}
+                    </div>
+                  )}
+                  {currentData.phoneNumber && (
+                    <div className="flex items-center gap-3">
+                      <Phone size={22} className="text-gray-600" />
+                      {currentData.phoneNumber}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     );
   }
 
-  // Edit/Create Mode
+  // ──────────────────────────────
+  //     CREATE / EDIT MODE (Your original form)
+  // ──────────────────────────────
   return (
-    <div className="space-y-6 pr-4">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900">
-          {edit ? "Edit Law Firm" : "Create Law Firm"}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {edit ? "Update law firm information" : "Add new law firm details"}
-        </p>
-      </div>
+    <div className="space-y-6">
+      <Tabs defaultValue="create" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="create">Create Law Firm</TabsTrigger>
+          <TabsTrigger value="positions">All Job Positions</TabsTrigger>
+          <TabsTrigger value="culture">Culture & Benefits</TabsTrigger>
+        </TabsList>
 
-      <div className="flex items-center gap-4">
-        <div className="relative">
-          <div className="h-20 w-20 rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
-            {logoPreview ? (
-              <Image
-                width={300}
-                height={300}
-                src={logoPreview}
-                alt="Logo preview"
-                className="h-full w-full object-cover"
+        <TabsContent value="create" className="space-y-6 pt-6">
+          {/* Logo / Cover Upload */}
+          <div className="flex flex-col items-center justify-center py-8">
+            <div className="relative">
+              <label
+                htmlFor="cover-upload"
+                className="cursor-pointer flex flex-col items-center justify-center w-40 h-40 border-2 border-dashed border-gray-300 rounded-xl hover:border-gray-400 transition-colors bg-gray-50"
+              >
+                {logoPreview ? (
+                  <Image
+                    width={160}
+                    height={160}
+                    src={logoPreview}
+                    alt="Cover preview"
+                    className="w-full h-full object-cover rounded-xl"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center">
+                    <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mb-3">
+                      <Upload className="w-8 h-8 text-white" />
+                    </div>
+                    <span className="text-base font-medium text-gray-700">Upload Cover Image</span>
+                  </div>
+                )}
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleLogoChange}
+                id="cover-upload"
+                disabled={disabled}
               />
-            ) : (
-              <Camera className="text-blue-600" />
+            </div>
+            {errors.coverImage && (
+              <p className="text-sm text-red-500 mt-3">{errors.coverImage}</p>
             )}
           </div>
 
-          {!view && (
-            <input
-              type="file"
-              accept="image/*"
-              className="absolute inset-0 opacity-0 cursor-pointer"
-              onChange={handleLogoChange}
-              id="logo-upload"
+          {/* Firm Name */}
+          <div className="space-y-2">
+            <Label>Firm Name <span className="text-red-500">*</span></Label>
+            <Input
+              value={formData.firmName || ""}
+              onChange={(e) => onChange("firmName", e.target.value)}
+              placeholder="ABC Legal Associates"
+              disabled={disabled}
             />
-          )}
-        </div>
+          </div>
 
-        <div>
-          <Label
-            htmlFor="logo-upload"
-            className="text-sm text-gray-600 cursor-pointer hover:text-gray-900"
-          >
-            {logoPreview ? "Change logo" : "Add logo"}
-          </Label>
-          <p className="text-xs text-muted-foreground mt-1">
-            Recommended: 200×200px PNG/JPG
-          </p>
-        </div>
-      </div>
+          {/* About Firm */}
+          <div className="space-y-2">
+            <Label>About the Firm <span className="text-red-500">*</span></Label>
+            <Textarea
+              rows={4}
+              value={formData.aboutFirm || ""}
+              onChange={(e) => onChange("aboutFirm", e.target.value)}
+              placeholder="Tell about your firm..."
+              disabled={disabled}
+            />
+          </div>
 
-      <div className="space-y-2">
-        <Label>About the Firm</Label>
-        <Textarea
-          rows={3}
-          placeholder="Brief overview of the firm's history, values, and mission"
-          value={formData.aboutFirm || ""}
-          onChange={(e) => onChange("aboutFirm", e.target.value)}
-          className="resize-none"
-        />
-      </div>
+          {/* Location • Founded • Employees */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Location <span className="text-red-500">*</span></Label>
+              <Input
+                value={formData.location || ""}
+                onChange={(e) => onChange("location", e.target.value)}
+                placeholder="Dhaka, Bangladesh"
+                disabled={disabled}
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label>Areas of Expertise (comma-separated)</Label>
-        <Input
-          type="text"
-          placeholder="Corporate Law, Commercial Litigation, Intellectual Property"
-          value={formData.exertise || ""}
-          disabled={disabled}
-          onChange={(e) => onChange("exertise", e.target.value)}
-        />
-        <p className="text-xs text-muted-foreground mt-1">
-          Separate each practice area with a comma
-        </p>
-      </div>
+            <div className="space-y-2">
+              <Label>Founded Year <span className="text-red-500">*</span></Label>
+              <Input
+                type="number"
+                value={formData.foundationYear || ""}
+                onChange={(e) => onChange("foundationYear", Number(e.target.value))}
+                placeholder="1995"
+                disabled={disabled}
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label>Training & Internship Programs</Label>
-        <Textarea
-          rows={3}
-          placeholder="Describe training contracts, vacation schemes, and internship programs"
-          value={formData.internshipTraining || ""}
-          disabled={disabled}
-          onChange={(e) => onChange("internshipTraining", e.target.value)}
-          className="resize-none"
-        />
-      </div>
+            <div className="space-y-2">
+              <Label>Number of Attorneys</Label>
+              <Input
+                type="number"
+                value={formData.numberOfAttorneys ?? ""}
+                onChange={(e) => onChange("numberOfAttorneys", Number(e.target.value))}
+                placeholder="25"
+                disabled={disabled}
+              />
+            </div>
+          </div>
 
-      <div className="space-y-2">
-        <Label>Detailed Description</Label>
-        <Textarea
-          rows={5}
-          placeholder="Detailed information about the firm's practice areas, culture, achievements, and values"
-          value={formData.description || ""}
-          disabled={disabled}
-          onChange={(e) => onChange("description", e.target.value)}
-          className="resize-none"
-        />
-      </div>
+          {/* Website • Email • Phone */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label>Website</Label>
+              <Input
+                value={formData.website || ""}
+                onChange={(e) => onChange("website", e.target.value)}
+                placeholder="https://www.example.com"
+                disabled={disabled}
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label>Office Location</Label>
-        <Input
-          type="text"
-          placeholder="City, Country"
-          value={formData.location || ""}
-          disabled={disabled}
-          onChange={(e) => onChange("location", e.target.value)}
-        />
-      </div>
+            <div className="space-y-2">
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={formData.email || ""}
+                onChange={(e) => onChange("email", e.target.value)}
+                placeholder="contact@firm.com"
+                disabled={disabled}
+              />
+            </div>
 
-      {edit && formData.logo && typeof formData.logo === "string" && (
-        <div className="mt-2 p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600 mb-2">Current logo:</p>
-          <Image
-            width={300}
-            height={300}
-            src={formData.logo}
-            alt="Current logo"
-            className="h-16 w-16 rounded-full object-cover border border-gray-200"
-          />
-        </div>
-      )}
+            <div className="space-y-2">
+              <Label>Phone</Label>
+              <Input
+                value={formData.phoneNumber || ""}
+                onChange={(e) => onChange("phoneNumber", e.target.value)}
+                placeholder="+880 1711-223344"
+                disabled={disabled}
+              />
+            </div>
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-2">
+            <Label>Tags / Expertise</Label>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+                {tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-1.5 bg-gray-200 text-gray-800 rounded-full text-sm flex items-center gap-2"
+                  >
+                    {tag}
+                    {!disabled && (
+                      <button
+                        type="button"
+                        onClick={() => removeItem(index, tags, setTags, "tags")}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Corporate Law, Litigation, Family Law..."
+                value={currentTag}
+                onChange={(e) => setCurrentTag(e.target.value)}
+                onKeyPress={(e) => handleKeyPress(e, () => addItem(tags, setTags, currentTag, setCurrentTag, "tags"))}
+                disabled={disabled}
+              />
+              <button
+                type="button"
+                onClick={() => addItem(tags, setTags, currentTag, setCurrentTag, "tags")}
+                disabled={disabled || !currentTag.trim()}
+                className="px-5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Key Highlights */}
+          <div className="space-y-2">
+            <Label>Key Highlights</Label>
+            <Textarea
+              rows={4}
+              value={formData.keyHighlights || ""}
+              onChange={(e) => onChange("keyHighlights", e.target.value)}
+              placeholder="Top ranked, experienced team, client focused..."
+              disabled={disabled}
+            />
+          </div>
+
+          {/* Internship Opportunities */}
+          <div className="space-y-2">
+            <Label>Internship Opportunities</Label>
+            {internshipOpportunities.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+                {internshipOpportunities.map((item, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-1.5 bg-indigo-100 text-indigo-800 rounded-full text-sm flex items-center gap-2"
+                  >
+                    {item}
+                    {!disabled && (
+                      <button
+                        type="button"
+                        onClick={() => removeItem(index, internshipOpportunities, setInternshipOpportunities, "internshipOpportunities")}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Summer internship, 6-month training..."
+                value={currentOpportunity}
+                onChange={(e) => setCurrentOpportunity(e.target.value)}
+                onKeyPress={(e) => handleKeyPress(e, () => addItem(internshipOpportunities, setInternshipOpportunities, currentOpportunity, setCurrentOpportunity, "internshipOpportunities"))}
+                disabled={disabled}
+              />
+              <button
+                type="button"
+                onClick={() => addItem(internshipOpportunities, setInternshipOpportunities, currentOpportunity, setCurrentOpportunity, "internshipOpportunities")}
+                disabled={disabled || !currentOpportunity.trim()}
+                className="px-5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* You can keep other tabs empty or add later */}
+      </Tabs>
     </div>
   );
 };

@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import Headers from "../../Reusable/Headers";
-import { Building, Edit, Eye, Plus, Trash2, MapPin, Users } from "lucide-react";
+import { Building, Edit, Eye, Plus, Trash2, MapPin, Users, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,9 +23,9 @@ const LawFirmCard = ({
   onDelete,
 }) => {
   const tagsArray =
-    typeof firm.exertise === "string"
-      ? firm.exertise.split(",").map((tag) => tag.trim())
-      : firm.exertise || [];
+    typeof firm.expertise === "string"
+      ? firm.expertise.split(",").map((tag) => tag.trim())
+      : firm.expertise || [];
 
   const visibleTags = tagsArray.slice(0, 2);
   const extraCount = tagsArray.length - visibleTags.length;
@@ -58,22 +58,20 @@ const LawFirmCard = ({
     gradients[Math.floor(Math.random() * gradients.length)];
 
   return (
-    <Card
+   <Card
       className={`rounded-3xl overflow-hidden border-2 transition-all duration-300 w-full max-w-full mx-auto hover:shadow-lg cursor-pointer ${
         isSelected ? "border-yellow-400 shadow-lg" : "border-gray-200 shadow-sm"
       }`}
       onClick={handleCardClick}
     >
-      <div
-        className={`bg-gradient-to-r ${randomGradient} p-4 md:p-6 flex justify-center items-center relative h-24 md:h-32`}
-      >
+      <div className={`bg-gradient-to-r ${randomGradient} p-4 md:p-6 flex justify-center items-center relative h-24 md:h-32`}>
         <div className="w-20 h-20 md:w-28 md:h-28 rounded-2xl flex items-center justify-center p-2 md:p-4 bg-opacity-90">
-          {firm.logo ? (
+          {firm.coverImage ? (
             <Image
               width={300}
               height={300}
-              src={firm.logo}
-              alt={firm.aboutFirm || "Law Firm"}
+              src={firm.coverImage}
+              alt={firm.firmName || "Law Firm"}
               className="w-full h-full object-contain rounded-xl"
             />
           ) : (
@@ -94,13 +92,12 @@ const LawFirmCard = ({
       </div>
 
       <div className="p-4 md:p-6">
-        <h3 className="text-lg md:text-xl font-semibold text-gray-900">
-          {firm.aboutFirm?.substring(0, 30) || "Law Firm"}
-          {firm.aboutFirm?.length > 30 && "..."}
+        <h3 className="text-lg md:text-xl font-semibold text-gray-900 truncate">
+          {firm.firmName || "Law Firm"}
         </h3>
-        <p className="text-xs md:text-sm text-gray-600 mt-1">
-          {firm.description?.substring(0, 50) || "Professional Legal Services"}
-          {firm.description?.length > 50 && "..."}
+
+        <p className="text-xs md:text-sm text-gray-600 mt-1 line-clamp-2">
+          {firm.description || "Professional Legal Services"}
         </p>
 
         <div className="mt-3 md:mt-4 flex flex-col gap-2">
@@ -110,32 +107,21 @@ const LawFirmCard = ({
               {firm.location || "Location not specified"}
             </span>
           </div>
+
           <div className="flex items-center">
             <Users className="text-gray-500 w-4 h-4 md:w-5 md:h-5" />
             <span className="ml-2 text-xs md:text-sm text-gray-600">
-              {firm.applyNumber?.length || 0} Applications
+              {firm.employees} Attorneys
             </span>
           </div>
-        </div>
 
-        <div className="mt-3 md:mt-4 flex flex-wrap gap-2">
-          {visibleTags.map((tag, i) => (
-            <Badge
-              key={i}
-              variant="secondary"
-              className="rounded-full border-gray-300 text-gray-700 text-xs font-normal"
-            >
-              {tag}
-            </Badge>
-          ))}
-          {extraCount > 0 && (
-            <Badge
-              variant="secondary"
-              className="rounded-full border-gray-300 text-gray-700 text-xs font-normal"
-            >
-              +{extraCount} more
-            </Badge>
-          )}
+          {/* Optional: show internship count */}
+          <div className="flex items-center">
+            <Briefcase className="text-gray-500 w-4 h-4 md:w-5 md:h-5" />
+            <span className="ml-2 text-xs md:text-sm text-gray-600">
+              {firm.internshipOpportunities?.length || 0} Opportunities
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center justify-between mt-8 gap-3">
@@ -145,6 +131,7 @@ const LawFirmCard = ({
           >
             <Eye size={16} className="text-gray-600" /> View
           </button>
+
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -188,7 +175,7 @@ const ManageLawFirms = () => {
           headers: {
             Authorization: `Bearer ${TOKEN}`,
           },
-        }
+        },
       );
       if (!res.ok) throw new Error("Failed to fetch law firms");
       const response = await res.json();
@@ -199,22 +186,46 @@ const ManageLawFirms = () => {
 
   const lawFirms = lawFirmsResponse?.data || [];
 
-  // Create mutation with FormData
+  // Prepare payload with correct field mapping for backend requirements
+  const preparePayload = (rawData: any, isUpdate = false) => {
+    const formData = new FormData();
+
+    if (rawData.coverImage instanceof File) {
+      formData.append("coverImage", rawData.coverImage);
+    }
+
+    const payloadData = {
+      firmType: "Law Firm",
+      firmName: rawData.firmName || "",
+      aboutFirm: rawData.aboutFirm || "",
+      location: rawData.location || "",
+      foundationYear: Number(rawData.foundationYear) || null,
+      employees: Number(rawData.employees) || 0,
+      website: rawData.website || "",
+      email: rawData.email || "",
+      phoneNumber: rawData.phoneNumber || "",
+      tags: Array.isArray(rawData.tags) ? rawData.tags : [],
+      practiceAreas: rawData.practiceAreas || "",
+      keyHighlights: rawData.keyHighlights || "",
+      internshipOpportunities: Array.isArray(rawData.internshipOpportunities)
+        ? rawData.internshipOpportunities
+        : [],
+      description: rawData.description || "",
+    };
+
+    formData.append("data", JSON.stringify(payloadData));
+
+    if (isUpdate && rawData._id) {
+      return { formData, _id: rawData._id };
+    }
+
+    return formData;
+  };
+
+  // Create mutation
   const createLawMutation = useMutation({
-    mutationFn: async (newFirm: any) => {
-      const formData = new FormData();
-      
-      // Append text fields
-      if (newFirm.aboutFirm) formData.append('aboutFirm', newFirm.aboutFirm);
-      if (newFirm.exertise) formData.append('exertise', newFirm.exertise);
-      if (newFirm.internshipTraining) formData.append('internshipTraining', newFirm.internshipTraining);
-      if (newFirm.description) formData.append('description', newFirm.description);
-      if (newFirm.location) formData.append('location', newFirm.location);
-      
-      // Append file if exists
-      if (newFirm.logo && newFirm.logo instanceof File) {
-        formData.append('logo', newFirm.logo);
-      }
+    mutationFn: async (rawData: any) => {
+      const payload = preparePayload(rawData);
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/lawfirm`,
@@ -223,13 +234,13 @@ const ManageLawFirms = () => {
           headers: {
             Authorization: `Bearer ${TOKEN}`,
           },
-          body: formData,
-        }
+          body: payload as any,
+        },
       );
-      
+
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to create law firm");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to create law firm");
       }
       return res.json();
     },
@@ -240,11 +251,8 @@ const ManageLawFirms = () => {
         title: "Success!",
         text: "Law firm created successfully!",
         confirmButtonColor: "#FFFF00",
-        customClass: {
-          confirmButton: "text-gray-900 font-semibold",
-        },
       });
-      closeModal();
+      setModalVisible(false);
     },
     onError: (error) => {
       Swal.fire({
@@ -255,23 +263,10 @@ const ManageLawFirms = () => {
     },
   });
 
-  // Update mutation with FormData
+  // Update mutation
   const updateLawMutation = useMutation({
-    mutationFn: async (updatedFirm: any) => {
-      const { _id, ...firmData } = updatedFirm;
-      const formData = new FormData();
-      
-      // Append text fields
-      if (firmData.aboutFirm) formData.append('aboutFirm', firmData.aboutFirm);
-      if (firmData.exertise) formData.append('exertise', firmData.exertise);
-      if (firmData.internshipTraining) formData.append('internshipTraining', firmData.internshipTraining);
-      if (firmData.description) formData.append('description', firmData.description);
-      if (firmData.location) formData.append('location', firmData.location);
-      
-      // Append file if exists and is a new file
-      if (firmData.logo && firmData.logo instanceof File) {
-        formData.append('logo', firmData.logo);
-      }
+    mutationFn: async (rawData: any) => {
+      const { formData, _id } = preparePayload(rawData, true) as any;
 
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/lawfirm/${_id}`,
@@ -281,12 +276,12 @@ const ManageLawFirms = () => {
             Authorization: `Bearer ${TOKEN}`,
           },
           body: formData,
-        }
+        },
       );
-      
+
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to update law firm");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to update law firm");
       }
       return res.json();
     },
@@ -297,9 +292,6 @@ const ManageLawFirms = () => {
         title: "Success!",
         text: "Law firm updated successfully!",
         confirmButtonColor: "#FFFF00",
-        customClass: {
-          confirmButton: "text-gray-900 font-semibold",
-        },
       });
       setIsEdit(false);
       setSelectedFirm(null);
@@ -315,7 +307,7 @@ const ManageLawFirms = () => {
 
   // Delete mutation
   const deleteLawMutation = useMutation({
-    mutationFn: async (firmId) => {
+    mutationFn: async (firmId: string) => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/lawfirm/${firmId}`,
         {
@@ -323,7 +315,7 @@ const ManageLawFirms = () => {
           headers: {
             Authorization: `Bearer ${TOKEN}`,
           },
-        }
+        },
       );
       if (!res.ok) {
         const error = await res.json();
@@ -338,16 +330,6 @@ const ManageLawFirms = () => {
         title: "Deleted!",
         text: "Law firm deleted successfully!",
         confirmButtonColor: "#FFFF00",
-        customClass: {
-          confirmButton: "text-gray-900 font-semibold",
-        },
-      });
-    },
-    onError: (error) => {
-      Swal.fire({
-        icon: "error",
-        title: "Error!",
-        text: error.message || "Failed to delete law firm. Please try again.",
       });
     },
   });
@@ -368,7 +350,7 @@ const ManageLawFirms = () => {
   };
 
   const handleDelete = (firm) => {
-    const firmName = firm.aboutFirm || "this law firm";
+    const firmName = firm.firmName || "this law firm";
     Swal.fire({
       title: "Are you sure?",
       text: `Do you want to delete ${firmName}?`,
@@ -432,11 +414,7 @@ const ManageLawFirms = () => {
       icon: "success",
       confirmButtonColor: "#FFFF00",
       confirmButtonText: "Continue",
-      customClass: {
-        confirmButton: "text-gray-900 font-semibold",
-      },
     }).then(() => {
-      console.log("Approving firms:", Array.from(selectedFirms));
       setSelectedFirms(new Set());
     });
   };

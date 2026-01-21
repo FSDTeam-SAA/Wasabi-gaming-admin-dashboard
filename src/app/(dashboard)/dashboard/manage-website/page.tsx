@@ -87,7 +87,7 @@ export default function ManageWebsitePage() {
             case 'achievements':
                 return <AchievementForm initialData={activeSectionData?.content} onSave={(data) => handleUpdate(sectionId, data)} onCancel={() => setSelectedSection(null)} />;
             default:
-                return <p>Form not implemented for {activeConfig.type}</p>;
+                return <p>Form not implemented for {(activeConfig as any).type}</p>;
         }
     };
 
