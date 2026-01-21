@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
 import CourseEditFields from '@/components/Reusable/modalFeilds/CourseEditFields';
+import LoderComponent from '@/components/loader/LoderComponent';
 
 // Category → Color mapping
 const getCategoryColor = (category: string = '') => {
@@ -83,7 +84,6 @@ interface Course {
 const CourseCard = ({ course }: { course: Course }) => {
   const [open, setOpen] = useState(false);
 
-  // ✅ Delete fix only
   const queryClient = useQueryClient();
   const { data: sessionData } = useSession();
   const token = sessionData?.user?.accessToken;
@@ -135,12 +135,12 @@ const CourseCard = ({ course }: { course: Course }) => {
             <FaUsers className={`text-sm text-${color}-600`} />
           </div>
           <div>
-            <h3 className='text-lg font-semibold text-gray-900 mb-1'>{course.name}</h3>
-            <p className='text-gray-500 text-sm'>Grade {course.gradeLevel}</p>
+            <h3 className='text-lg font-semibold text-gray-900 mb-1'>{course?.name}</h3>
+            <p className='text-gray-500 text-sm'>Grade {course?.gradeLevel}</p>
           </div>
         </div>
         <span className={`bg-${color}-50 text-${color}-700 px-3 py-1 rounded-full text-xs font-semibold`}>
-          {course.category}
+          {course?.category}
         </span>
       </div>
 
@@ -148,7 +148,7 @@ const CourseCard = ({ course }: { course: Course }) => {
         <div className='w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center'>
           <FaUsers className="text-gray-500 text-sm" />
         </div>
-        <span className='font-medium text-gray-700'>{course.enrolledStudents?.length || 0}</span>
+        <span className='font-medium text-gray-700'>{course?.enrolledStudents?.length || 0}</span>
         <span className='text-gray-500 text-sm'>students enrolled</span>
       </div>
 
@@ -262,7 +262,9 @@ export default function Courses() {
     createCourseMutation.mutate(formData);
   };
 
-  const courses = apiResponse?.data || [];
+    if (isLoading) return <LoderComponent />;
+
+    const courses = apiResponse?.data || [];
 
   return (
     <div className='p-0'>

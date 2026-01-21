@@ -1,8 +1,26 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { Upload, FileText } from "lucide-react";
+
+import * as React from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -10,202 +28,319 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Plus, Trash2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
-const QuizFields = ({ formData, onChange, edit = false }) => {
-  const [previewUrl, setPreviewUrl] = useState(null);
+/* ─── Zod Schema ────────────────────────────────────────────── */
+const quizSchema = z.object({
+  title: z.string().min(1, "Quiz title is required"),
+  options: z
+    .array(z.string().min(1, "Option cannot be empty"))
+    .min(2, "At least 2 options required"),
+  answer: z.string().min(1, "Correct answer is required"),
+});
 
-  useEffect(() => {
-    if (formData.quizFile instanceof File) {
-      const url = URL.createObjectURL(formData.quizFile);
-      setPreviewUrl(url);
+const formSchema = z.object({
+  courseId: z.string().min(1, "Select a course"),
+  videoId: z.string().min(1, "Select a video"),
+  quizzes: z.array(quizSchema).min(1),
+});
 
-      return () => URL.revokeObjectURL(url);
-    }
-  }, [formData.quizFile]);
+type FormValues = z.infer<typeof formSchema>;
 
-  const isPDF =
-    formData.quizFile?.type === "application/pdf" ||
-    formData.quizFileName?.endsWith(".pdf");
+interface QuizModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
-  const isCSV =
-    formData.quizFile?.type === "text/csv" ||
-    formData.quizFileName?.endsWith(".csv");
-
-  // Form fields configuration
-  const createFields = [
-    {
-      name: "name",
-      label: "Quiz Title",
-      type: "text",
-      placeholder: "e.g., Contract Law - Chapter 3: Offer and Acceptance",
+export function QuizModal({ open, onOpenChange }: QuizModalProps) {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      courseId: "",
+      videoId: "",
+      quizzes: [{ title: "", options: ["", ""], answer: "" }],
     },
-    {
-      name: "educationLevel",
-      label: "Education Level",
-      type: "select",
-      options: [
-        { label: "Reception", value: "RECEPTION" },
+  });
 
-        { label: "Year 1", value: "Y1" },
-        { label: "Year 2", value: "Y2" },
-        { label: "Year 3", value: "Y3" },
-        { label: "Year 4", value: "Y4" },
-        { label: "Year 5", value: "Y5" },
-        { label: "Year 6", value: "Y6" },
+  const { control, watch, handleSubmit, reset } = form;
+  const queryClient = useQueryClient();
 
-        { label: "Year 7", value: "Y7" },
-        { label: "Year 8", value: "Y8" },
-        { label: "Year 9", value: "Y9" },
+  const { data: sessionData } = useSession();
+  const token = sessionData?.user?.accessToken;
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL!;
 
-        { label: "GCSE – Year 10", value: "Y10" },
-        { label: "GCSE – Year 11", value: "Y11" },
 
-        { label: "A-Level – Year 12", value: "Y12" },
-        { label: "A-Level – Year 13", value: "Y13" },
-      ],
-      placeholder: "Select education level",
+  const { data: apiResponse } = useQuery({
+    queryKey: ["courses", token],
+    queryFn: async () => {
+      if (!token) throw new Error("Authentication required");
+      const res = await fetch(`${API_BASE}/course`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch courses");
+      return res.json();
     },
-    {
-      name: "questions",
-      label: "Number of Questions",
-      type: "text",
-      placeholder: "e.g., 25",
-    },
-    {
-      name: "duration",
-      label: "Duration (minutes)",
-      type: "text",
-      placeholder: "e.g., 60",
-    },
-    {
-      name: "status",
-      label: "Status",
-      type: "select",
-      options: [
-        { label: "Active", value: "Active" },
-        { label: "Inactive", value: "Inactive" },
-        { label: "Upcoming", value: "Upcoming" },
-        { label: "Draft", value: "Draft" },
-      ],
-      placeholder: "Select status",
-    },
-  ];
+    enabled: !!token,
+  });
+  const courses = apiResponse?.data || [];
 
-  // Filter out status field if in create mode and not edit
-  const fields = edit
-    ? createFields
-    : createFields.filter((field) => field.name !== "status");
 
-  const renderField = (field) => {
-    switch (field.type) {
-      case "select":
-        return (
-          <Select
-            value={formData[field.name] || ""}
-            onValueChange={(value) => onChange(field.name, value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={field.placeholder} />
-            </SelectTrigger>
-            <SelectContent>
-              {field.options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
+  const quizzes = watch("quizzes");
+  const selectedCourseId = watch("courseId");
 
-      default:
-        return (
-          <Input
-            type={field.type}
-            id={field.name}
-            value={formData[field.name] || ""}
-            onChange={(e) => onChange(field.name, e.target.value)}
-            placeholder={field.placeholder}
-          />
-        );
-    }
+  // Find videos for selected course dynamically
+  const availableVideos =
+    courses.find(c => c._id === selectedCourseId)?.courseVideo || [];
+
+  const { fields: quizFields, append, remove } = useFieldArray({
+    control,
+    name: "quizzes",
+  });
+
+
+  const createQuiz = useMutation({
+    mutationFn: async (data: FormValues) => {
+      if (!token) throw new Error("Authentication token missing");
+
+      const response = await fetch(`${API_BASE}/quizzes`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to create quizzes");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast.success("Quizzes created successfully!");
+      queryClient.invalidateQueries({ queryKey: ["quizzes"] });
+      reset();
+      onOpenChange(false);
+    },
+    onError: (err: any) => {
+      toast.error(err.message || "Something went wrong");
+      console.error(err);
+    },
+  });
+
+  const onSubmit = (data: FormValues) => {
+    createQuiz.mutate(data);
   };
 
   return (
-    <div className="space-y-6">
-      {/* Form Fields */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {fields.map((field) => (
-          <div key={field.name} className="space-y-2">
-            <Label htmlFor={field.name}>{field.label}</Label>
-            {renderField(field)}
-          </div>
-        ))}
-      </div>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Add Quizzes</DialogTitle>
+        </DialogHeader>
 
-      {/* Upload Section */}
-      <div className="border-t pt-6">
-        <Label className="mb-2 block">Upload quiz file</Label>
-
-        <label className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-6 cursor-pointer hover:border-yellow-400 transition">
-          <Upload className="h-6 w-6 text-gray-400 mb-2" />
-          <p className="text-sm text-gray-500">
-            Click to upload or drag and drop
-          </p>
-          <p className="text-xs text-gray-400">
-            Upload case files, legal documents, or question banks (CSV, PDF) Max.
-            5MB
-          </p>
-
-          <input
-            type="file"
-            accept=".csv,.pdf"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if (!file) return;
-
-              onChange("quizFile", file);
-              onChange("quizFileName", file.name);
-            }}
-          />
-        </label>
-
-        {/* File Name */}
-        {(formData.quizFileName || formData.quizFile) && (
-          <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-            <FileText className="h-4 w-4" />
-            {formData.quizFileName || formData.quizFile?.name}
-          </div>
-        )}
-      </div>
-
-      {/* 🔍 PREVIEW SECTION */}
-      {previewUrl && (
-        <div className="border rounded-lg p-3 bg-gray-50">
-          <p className="text-xs font-medium text-gray-500 mb-2">
-            Legal Document Preview
-          </p>
-
-          {/* PDF Preview */}
-          {isPDF && (
-            <iframe
-              src={previewUrl}
-              className="w-full h-64 rounded-md border"
-              title="Legal Document Preview"
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-4">
+            {/* Course Select */}
+            <FormField
+              control={control}
+              name="courseId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Course</FormLabel>
+                  <FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select course" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {courses.map(c => (
+                          <SelectItem key={c._id} value={c._id}>
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          )}
 
-          {/* CSV Preview */}
-          {isCSV && (
-            <p className="text-sm text-gray-600">
-              Case file uploaded successfully. Preview not supported — document
-              will be processed for legal terminology and citations.
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+            {/* Video Select */}
+            <FormField
+              control={control}
+              name="videoId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Video / Lesson</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!selectedCourseId}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select video" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {availableVideos.map(v => (
+                          <SelectItem key={v._id} value={v._id}>
+                            {v.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Quizzes */}
+            <div className="space-y-6">
+              <div className="flex justify-between">
+                <h3 className="text-lg font-medium">Quizzes</h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    append({ title: "", options: ["", ""], answer: "" })
+                  }
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Quiz
+                </Button>
+              </div>
+
+              {quizFields.map((quiz, index) => (
+                <div key={quiz.id} className="border rounded-lg p-5 space-y-5">
+                  <div className="flex justify-between">
+                    <h4>Quiz {index + 1}</h4>
+                    {quizFields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => remove(index)}
+                        className="text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4 mr-1" />
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Title */}
+                  <FormField
+                    control={control}
+                    name={`quizzes.${index}.title`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Title</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Quiz title" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Options */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Options</label>
+                    {quizzes[index].options.map((_, optIndex) => (
+                      <FormField
+                        key={optIndex}
+                        control={control}
+                        name={`quizzes.${index}.options.${optIndex}`}
+                        render={({ field }) => (
+                          <FormItem className="flex gap-2 items-center">
+                            <FormControl>
+                              <Input
+                                {...field}
+                                placeholder={`Option ${String.fromCharCode(
+                                  65 + optIndex
+                                )}`}
+                              />
+                            </FormControl>
+
+                            {quizzes[index].options.length > 2 && (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() =>
+                                  form.setValue(
+                                    `quizzes.${index}.options`,
+                                    quizzes[index].options.filter(
+                                      (_, i) => i !== optIndex
+                                    )
+                                  )
+                                }
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
+
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    ))}
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        form.setValue(`quizzes.${index}.options`, [
+                          ...quizzes[index].options,
+                          "",
+                        ])
+                      }
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Option
+                    </Button>
+                  </div>
+
+                  {/* Answer */}
+                  <FormField
+                    control={control}
+                    name={`quizzes.${index}.answer`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Correct Answer</FormLabel>
+                        <FormControl>
+                          <Input {...field} placeholder="Correct answer" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end gap-4 pt-4 border-t">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit">Create Quizzes</Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
-};
-
-export default QuizFields;
+}

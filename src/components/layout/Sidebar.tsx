@@ -19,6 +19,7 @@ import {
   Crown,
   Settings,
   LogOut,
+  Globe,
 } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 
@@ -36,6 +37,7 @@ const sidebarItems = [
     icon: ClipboardList,
   },
   { label: 'Portfolio', href: '/dashboard/portfolio', icon: Flag },
+  { label: 'Manage Website', href: '/dashboard/manage-website', icon: Globe }, // Added Manage Website
   { label: 'Premium', href: '/dashboard/premium', icon: Crown },
   { label: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
