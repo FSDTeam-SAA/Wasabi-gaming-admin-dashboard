@@ -4,12 +4,15 @@ import { WebsiteSection } from '../types';
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 // Helper to get headers
-const getAuthHeaders = async () => {
+const getAuthHeaders = async (isMultipart = false) => {
     const session = await getSession();
-    return {
-        'Content-Type': 'application/json',
+    const headers: Record<string, string> = {
         Authorization: `Bearer ${session?.user?.accessToken || ''}`,
     };
+    if (!isMultipart) {
+        headers['Content-Type'] = 'application/json';
+    }
+    return headers;
 };
 
 export const websiteApi = {
@@ -33,7 +36,7 @@ export const websiteApi = {
         }
     },
 
-    // Update a section
+    // Update a section (generic)
     updateSection: async (id: string, data: Partial<WebsiteSection>): Promise<{ success: boolean; data: WebsiteSection }> => {
         const headers = await getAuthHeaders();
         try {
@@ -53,4 +56,113 @@ export const websiteApi = {
             throw error;
         }
     },
+
+    // --- Hero & CTA Sections (/website) ---
+    getHeroSections: async (type?: string): Promise<{ success: boolean; data: any[] }> => {
+        const headers = await getAuthHeaders();
+        const url = type ? `${API_BASE_URL}/website?type=${type}` : `${API_BASE_URL}/website`;
+        const res = await fetch(url, { headers });
+        return res.json();
+    },
+
+    createHeroSection: async (formData: FormData): Promise<{ success: boolean; data: any }> => {
+        const headers = await getAuthHeaders(true);
+        const res = await fetch(`${API_BASE_URL}/website`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+        return res.json();
+    },
+
+    updateHeroSection: async (id: string, formData: FormData): Promise<{ success: boolean; data: any }> => {
+        const headers = await getAuthHeaders(true);
+        const res = await fetch(`${API_BASE_URL}/website/${id}`, {
+            method: 'PUT',
+            headers,
+            body: formData,
+        });
+        return res.json();
+    },
+
+    deleteHeroSection: async (id: string): Promise<{ success: boolean }> => {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/website/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+        return res.json();
+    },
+
+    // --- Recent Achievement Cards (/card) ---
+    getCards: async (): Promise<{ success: boolean; data: any[] }> => {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/card`, { headers });
+        return res.json();
+    },
+
+    createCard: async (formData: FormData): Promise<{ success: boolean; data: any }> => {
+        const headers = await getAuthHeaders(true);
+        const res = await fetch(`${API_BASE_URL}/card`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+        return res.json();
+    },
+
+    updateCard: async (id: string, formData: FormData): Promise<{ success: boolean; data: any }> => {
+        const headers = await getAuthHeaders(true);
+        const res = await fetch(`${API_BASE_URL}/card/${id}`, {
+            method: 'PUT',
+            headers,
+            body: formData,
+        });
+        return res.json();
+    },
+
+    deleteCard: async (id: string): Promise<{ success: boolean }> => {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/card/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+        return res.json();
+    },
+
+    // --- Team Sections (/team) ---
+    getTeam: async (): Promise<{ success: boolean; data: any[] }> => {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/team`, { headers });
+        return res.json();
+    },
+
+    createTeamMember: async (formData: FormData): Promise<{ success: boolean; data: any }> => {
+        const headers = await getAuthHeaders(true);
+        const res = await fetch(`${API_BASE_URL}/team`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+        return res.json();
+    },
+
+    updateTeamMember: async (id: string, formData: FormData): Promise<{ success: boolean; data: any }> => {
+        const headers = await getAuthHeaders(true);
+        const res = await fetch(`${API_BASE_URL}/team/${id}`, {
+            method: 'PUT',
+            headers,
+            body: formData,
+        });
+        return res.json();
+    },
+
+    deleteTeamMember: async (id: string): Promise<{ success: boolean }> => {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/team/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+        return res.json();
+    }
 };
