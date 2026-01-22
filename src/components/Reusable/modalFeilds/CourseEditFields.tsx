@@ -22,6 +22,7 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface CourseEditModalProps {
     open: boolean;
@@ -39,6 +40,7 @@ const CourseEditModal = ({
     const { data: session } = useSession();
     const token = session?.user?.accessToken;
     const queryClient = useQueryClient();
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         courseName: initialData?.courseName || "",
         description: initialData?.description || "",
@@ -46,9 +48,10 @@ const CourseEditModal = ({
         category: initialData?.category || "",
         coursePrice: initialData?.coursePrice || 0,
         videos: initialData?.videos || [],
+        thumbnail: initialData?.thumbnail || null,
     });
 
-    console.log(formData)
+
 
     const updateCourseMutation = useMutation({
         mutationFn: async (payload: FormData) => {
@@ -58,6 +61,7 @@ const CourseEditModal = ({
                     method: "PUT",
                     headers: {
                         Authorization: `Bearer ${token}`,
+
                     },
                     body: payload,
                 }
@@ -80,6 +84,7 @@ const CourseEditModal = ({
 
     const addVideoMutation = useMutation({
         mutationFn: async (payload: FormData) => {
+            console.log(payload)
             const res = await fetch(
                 `${process.env.NEXT_PUBLIC_API_BASE_URL}/course/${courseId}/video`,
                 {
@@ -163,6 +168,56 @@ const CourseEditModal = ({
         }
     };
 
+    const handleThumbnailChange = (file: File | null) => {
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please select an image file");
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error("Image must be under 5MB");
+            return;
+        }
+
+        setPreviewImage(URL.createObjectURL(file));
+        handleChange("thumbnail", file);
+    };
+
+    // const handleSubmit = () => {
+    //     const courseData = {
+    //         name: formData.courseName.trim(),
+    //         description: formData.description.trim(),
+    //         gradeLevel: formData.grade,
+    //         category: formData.category,
+    //         coursePrice: Number(formData.coursePrice) || 0,
+    //     };
+
+    //     const newVideos = formData.videos.filter((video: any) => video.file instanceof File);
+
+    //     const detailsPayload = new FormData();
+    //     detailsPayload.append("data", JSON.stringify(courseData));
+
+    //     if (newVideos.length > 0) {
+    //         const addPayload = new FormData();
+    //         const titlesArr: string[] = [];
+    //         newVideos.forEach((video: any) => {
+    //             addPayload.append("courseVideo", video.file);
+    //             titlesArr.push(video.title.trim());
+    //         });
+    //         addPayload.append("titles", JSON.stringify(titlesArr));
+
+    //         addVideoMutation.mutate(addPayload, {
+    //             onSuccess: () => {
+    //                 updateCourseMutation.mutate(detailsPayload);
+    //             },
+    //         });
+    //     } else {
+    //         updateCourseMutation.mutate(detailsPayload);
+    //     }
+    // };
+
     const handleSubmit = () => {
         const courseData = {
             name: formData.courseName.trim(),
@@ -172,11 +227,15 @@ const CourseEditModal = ({
             coursePrice: Number(formData.coursePrice) || 0,
         };
 
-        const newVideos = formData.videos.filter((video: any) => video.file instanceof File);
+        const newVideos = formData.videos.filter((v: any) => v.file instanceof File);
 
         const detailsPayload = new FormData();
         detailsPayload.append("data", JSON.stringify(courseData));
 
+
+        if (formData.thumbnail instanceof File) {
+            detailsPayload.append("thumbnail", formData.thumbnail);
+        }
         if (newVideos.length > 0) {
             const addPayload = new FormData();
             const titlesArr: string[] = [];
@@ -203,6 +262,61 @@ const CourseEditModal = ({
                     <DialogTitle className="text-2xl font-bold">Edit Course</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-6 py-4">
+                    {/* Thumbnail Upload with Preview */}
+                    <div className="space-y-2">
+                        <Label>Course Thumbnail</Label>
+
+                        <label
+                            className={`
+                flex flex-col items-center justify-center 
+                border-2 border-dashed rounded-lg p-6 cursor-pointer
+                hover:border-yellow-400 transition
+                ${previewImage || formData.thumbnail
+                                    ? "border-yellow-400"
+                                    : "border-gray-300"}
+              `}
+                        >
+                            {previewImage || formData.thumbnail ? (
+                                <div className="relative w-full max-w-xs mx-auto">
+                                    <Image
+                                        src={
+                                            previewImage
+                                                ? previewImage
+                                                : formData.thumbnail
+                                        }
+                                        alt="Thumbnail preview"
+                                        width={300}
+                                        height={200}
+                                        className="w-full h-auto object-cover rounded-md"
+                                        unoptimized
+                                    />
+                                    <p className="text-xs text-gray-500 mt-2 text-center">
+                                        Click to replace
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <Upload className="h-8 w-8 text-gray-400 mb-3" />
+                                    <p className="text-sm font-medium text-gray-700">
+                                        Click to upload thumbnail
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        JPG, PNG • Max 5MB
+                                    </p>
+                                </>
+                            )}
+
+                            <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                className="hidden"
+                                onChange={(e) =>
+                                    handleThumbnailChange(e.target.files?.[0] || null)
+                                }
+                            />
+                        </label>
+                    </div>
+
                     {/* Course Name */}
                     <div className="space-y-2">
                         <Label>Course Name *</Label>
@@ -234,13 +348,13 @@ const CourseEditModal = ({
                                     <SelectValue placeholder="Select grade" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="6">Grade 6</SelectItem>
-                                    <SelectItem value="7">Grade 7</SelectItem>
-                                    <SelectItem value="8">Grade 8</SelectItem>
-                                    <SelectItem value="9">Grade 9</SelectItem>
-                                    <SelectItem value="10">Grade 10</SelectItem>
-                                    <SelectItem value="11">Grade 11</SelectItem>
-                                    <SelectItem value="12">Grade 12</SelectItem>
+                                    <SelectItem value="grade 6">Grade 6</SelectItem>
+                                    <SelectItem value="grade 7">Grade 7</SelectItem>
+                                    <SelectItem value="grade 8">Grade 8</SelectItem>
+                                    <SelectItem value="grade 9">Grade 9</SelectItem>
+                                    <SelectItem value="grade 10">Grade 10</SelectItem>
+                                    <SelectItem value="grade 11">Grade 11</SelectItem>
+                                    <SelectItem value="grade 12">Grade 12</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
