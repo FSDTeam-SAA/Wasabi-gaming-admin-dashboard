@@ -74,6 +74,7 @@ interface Course {
   description?: string;
   gradeLevel: string;
   category: string;
+  thumbnail: string;
   coursePrice: number;
   enrolledStudents: string[];
   courseVideo: Array<{ title: string; url: string; time: string }>;
@@ -96,6 +97,7 @@ const CourseCard = ({ course }: { course: Course }) => {
     grade: course.gradeLevel || "",
     category: course.category || "",
     coursePrice: course.coursePrice || 0,
+    thumbnail: course?.thumbnail || "",
     videos: course.courseVideo.map((video: any) => ({ file: null, title: video.title, existingUrl: video.url, time: video.time, _id: video._id }))
   };
 
@@ -232,6 +234,7 @@ export default function Courses() {
   });
 
   const handleCreateCourse = (modalData: any) => {
+    console.log(modalData)
     const formData = new FormData();
     const coursePayload = {
       name: modalData.courseName?.trim() || "",
@@ -250,6 +253,9 @@ export default function Courses() {
         }
       });
 
+      if (modalData?.thumbnail) {
+        formData.append("thumbnail", modalData.thumbnail);
+      }
       // Ensure titles array matches the videos array
       const titles: string[] = modalData.videos.map((video: any, index: number) => {
         // If the user provided a title, use it. Otherwise fallback to file name
@@ -262,9 +268,9 @@ export default function Courses() {
     createCourseMutation.mutate(formData);
   };
 
-    if (isLoading) return <LoderComponent />;
+  if (isLoading) return <LoderComponent />;
 
-    const courses = apiResponse?.data || [];
+  const courses = apiResponse?.data || [];
 
   return (
     <div className='p-0'>

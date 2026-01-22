@@ -123,16 +123,15 @@ const ApplicationTracker = () => {
     statusFilter === "All Status"
       ? applications
       : applications.filter(
-          (item) =>
-            item.status?.toLowerCase() === statusFilter.toLowerCase()
-        );
+        (item) =>
+          item.status?.toLowerCase() === statusFilter.toLowerCase()
+      );
 
   const filterOptions = [
     "All Status",
     "pending",
     "approved",
     "rejected",
-    // Add more if your system has additional statuses
   ];
 
   const columns = [
@@ -168,10 +167,10 @@ const ApplicationTracker = () => {
           <span className="text-sm text-gray-700">
             {value
               ? new Date(value).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })
               : "N/A"}
           </span>
         </div>
@@ -281,8 +280,8 @@ const ApplicationTracker = () => {
                   {columns.map((column, colIndex) => {
                     const value = column.accessor.includes(".")
                       ? column.accessor
-                          .split(".")
-                          .reduce((o, k) => (o || {})[k], row)
+                        .split(".")
+                        .reduce((o, k) => (o || {})[k], row)
                       : row[column.accessor];
 
                     return (
