@@ -191,7 +191,7 @@ export function TeamManagement() {
             resetForm()
             setIsModalOpen(true)
           }}
-          className="bg-[#FFEF00] text-black hover:bg-[#E6D700] rounded-full px-6 font-semibold"
+          className="bg-[#FFFF00] text-black hover:bg-[#E6E600] rounded-full px-6 font-semibold"
         >
           <Plus className="w-4 h-4 mr-2" /> Add Member
         </Button>
@@ -263,12 +263,12 @@ export function TeamManagement() {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-[16px] font-bold text-foreground">
+                    <div className="text-base font-bold text-foreground">
                       {member.name}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="text-[18px] font-medium text-muted-foreground">
+                    <div className="text-base font-medium text-muted-foreground">
                       {member.profession}
                     </div>
                   </TableCell>
@@ -390,7 +390,7 @@ export function TeamManagement() {
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-[#FFEF00] text-black hover:bg-[#E6D700] rounded-full px-10 font-bold h-12 shadow-none"
+                className="bg-[#FFFF00] text-black hover:bg-[#E6E600] rounded-full px-10 font-bold h-12 shadow-none"
               >
                 {submitting && (
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />

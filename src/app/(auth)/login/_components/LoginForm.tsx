@@ -1,13 +1,13 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { Eye, EyeOff, Mail } from "lucide-react";
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { signIn } from "next-auth/react";
-import { toast } from "sonner";
-import Image from "next/image";
+import { useState } from 'react'
+import { Eye, EyeOff, Mail } from 'lucide-react'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { signIn } from 'next-auth/react'
+import { toast } from 'sonner'
+import Image from 'next/image'
 
 import {
   Card,
@@ -15,9 +15,9 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Form,
   FormControl,
@@ -25,59 +25,58 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form'
 
 /* ------------------ Zod Schema ------------------ */
 const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
+  email: z.string().email('Please enter a valid email'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+})
 
-type LoginFormValues = z.infer<typeof loginSchema>;
+type LoginFormValues = z.infer<typeof loginSchema>
 
 /* ------------------ Component ------------------ */
 export default function LoginForm() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
-  });
+  })
 
   /* ------------------ Submit Handler ------------------ */
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      setLoading(true);
+      setLoading(true)
 
-      const res = await signIn("credentials", {
+      const res = await signIn('credentials', {
         redirect: false,
         email: values.email,
         password: values.password,
-      });
+      })
 
       if (res?.error) {
-        if (res.error.includes("admin_only")) {
-          toast.error("Only admin users can login");
+        if (res.error.includes('admin_only')) {
+          toast.error('Only admin users can login')
         } else {
-          toast.error("Invalid email or password");
+          toast.error('Invalid email or password')
         }
-        return;
+        return
       }
 
-      toast.success("Login successful 🎉");
-      window.location.href = "/dashboard";
+      toast.success('Login successful 🎉')
+      window.location.href = '/dashboard'
     } catch (error) {
-      toast.error("Something went wrong. Please try again.");
-      console.error(error);
+      toast.error('Something went wrong. Please try again.')
+      console.error(error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div className="flex justify-center items-center min-h-screen px-4">
@@ -102,10 +101,7 @@ export default function LoginForm() {
 
         <CardContent>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-5"
-            >
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               {/* Email */}
               <FormField
                 control={form.control}
@@ -138,7 +134,7 @@ export default function LoginForm() {
                     <FormControl>
                       <div className="relative">
                         <Input
-                          type={showPassword ? "text" : "password"}
+                          type={showPassword ? 'text' : 'password'}
                           placeholder="Enter password"
                           {...field}
                           className="py-5"
@@ -167,12 +163,12 @@ export default function LoginForm() {
                 disabled={loading}
                 className="w-full bg-[#FFFF00] text-black hover:bg-[#FFFF00]/70"
               >
-                {loading ? "Logging in..." : "Login"}
+                {loading ? 'Logging in...' : 'Login'}
               </Button>
             </form>
           </Form>
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }

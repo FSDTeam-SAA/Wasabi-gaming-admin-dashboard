@@ -56,11 +56,11 @@ export function QuestionEditor({
   }
 
   return (
-    <Card className="mb-4 border-2 border-primary shadow-lg">
+    <Card className="mb-4 border border-slate-200 shadow-sm">
       <CardContent className="pt-6">
         <div className="flex items-start justify-between mb-4">
           <h3 className="font-semibold text-lg">
-            Editing Question {index + 1}
+            Edit Practice Questions: {index + 1}
           </h3>
           <div className="flex gap-2">
             <Button
@@ -93,7 +93,7 @@ export function QuestionEditor({
               onChange={e =>
                 setFormData({ ...formData, question: e.target.value })
               }
-              className="mt-2"
+              className="mt-2 focus-visible:ring-slate-400"
               placeholder="Enter your question here..."
             />
           </div>
@@ -106,7 +106,7 @@ export function QuestionEditor({
                 setFormData({ ...formData, difficulty: value })
               }
             >
-              <SelectTrigger className="mt-2">
+              <SelectTrigger className="mt-2 focus:ring-slate-400">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

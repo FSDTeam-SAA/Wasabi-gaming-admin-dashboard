@@ -55,18 +55,6 @@ export const psychometricApi = {
     return await response.json()
   },
 
-  async deleteTest(testId: string): Promise<ApiResponse<PsychometricTest>> {
-    const headers = await getAuthHeaders()
-    const response = await fetch(
-      `${API_BASE_URL}/psychometric-test/${testId}`,
-      {
-        method: 'DELETE',
-        headers,
-      },
-    )
-    if (!response.ok) throw new Error('Failed to delete test')
-    return await response.json()
-  },
 
   async addQuestion(
     testId: string,

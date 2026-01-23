@@ -3,17 +3,9 @@
 import { useEffect, useState } from 'react'
 import { SECTION_CONFIG } from './sectionConfig'
 import { SectionCard } from './components/SectionCard'
-import { EditModal } from './components/EditModal'
 import { WebsiteSection } from './types'
 import { websiteApi } from './services/website.api'
 import { Loader2 } from 'lucide-react'
-import { Separator } from '@/components/ui/separator'
-
-// Placeholder forms (will substitute with real ones)
-import { CTAForm } from './components/forms/CTAForm'
-import { ImageForm } from './components/forms/ImageForm'
-import { TeamForm } from './components/forms/TeamForm'
-import { AchievementForm } from './components/forms/AchievementForm'
 
 import { HeroCTAManagement } from './actions/HeroCTA/HeroCTAManagement'
 import { TeamManagement } from './actions/Team/TeamManagement'
