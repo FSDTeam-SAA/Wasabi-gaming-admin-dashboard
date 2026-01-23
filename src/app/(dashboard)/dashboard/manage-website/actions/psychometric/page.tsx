@@ -1,4 +1,3 @@
-import React from 'react'
 import PsychometricTestManager from './_components/psychometricTestManager'
 
 const page = () => {

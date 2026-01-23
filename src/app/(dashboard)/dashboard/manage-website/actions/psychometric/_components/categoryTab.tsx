@@ -23,7 +23,6 @@ interface CategoryTabProps {
   onSave: (testId: string, questionId: string, data: Partial<Question>) => void
   onDelete: (testId: string, questionId: string) => void
   onAddQuestion: (testId: string) => void
-  onDeleteTest: (testId: string) => void
   saving: boolean
 }
 
@@ -36,7 +35,6 @@ export function CategoryTab({
   onSave,
   onDelete,
   onAddQuestion,
-  onDeleteTest,
   saving,
 }: CategoryTabProps) {
   if (!test) {
@@ -89,27 +87,19 @@ export function CategoryTab({
         })
       )}
 
-      <div className="flex gap-2 pt-4">
+      <div className="flex flex-col items-center gap-4 pt-8">
         <Button
           onClick={() => onAddQuestion(test._id)}
-          className="flex-1"
-          variant="secondary"
+          className="w-12 h-12 rounded-lg border-2 border-dashed border-muted-foreground/30 bg-white hover:bg-muted/50 hover:border-primary/50 transition-all group flex items-center justify-center p-0"
+          variant="ghost"
           disabled={saving}
+          title="Add Question"
         >
           {saving ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <Loader2 className="w-5 h-5 animate-spin text-primary" />
           ) : (
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
           )}
-          Add Question
-        </Button>
-        <Button
-          onClick={() => onDeleteTest(test._id)}
-          variant="destructive"
-          disabled={saving}
-        >
-          <Trash2 className="w-4 h-4 mr-2" />
-          Delete Test
         </Button>
       </div>
     </TabsContent>

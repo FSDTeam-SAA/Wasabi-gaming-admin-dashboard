@@ -12,9 +12,6 @@ export function usePsychometricTests() {
   const { data: testsData, isLoading } = useQuery({
     queryKey: ['psychometric-tests'],
     queryFn: psychometricApi.getAllTests,
-    onError: () => {
-      toast.error('Failed to load tests')
-    },
   })
 
   const tests = testsData?.data || []
@@ -83,16 +80,6 @@ export function usePsychometricTests() {
     },
   })
 
-  const deleteTestMutation = useMutation({
-    mutationFn: psychometricApi.deleteTest,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['psychometric-tests'] })
-      toast.success('Test deleted successfully')
-    },
-    onError: () => {
-      toast.error('Failed to delete test')
-    },
-  })
 
   return {
     tests,
@@ -101,8 +88,7 @@ export function usePsychometricTests() {
       createTestMutation.isPending ||
       updateTestMutation.isPending ||
       addQuestionMutation.isPending ||
-      deleteQuestionMutation.isPending ||
-      deleteTestMutation.isPending,
+      deleteQuestionMutation.isPending,
     createTest: createTestMutation.mutate,
     updateQuestion: (
       testId: string,
@@ -123,6 +109,5 @@ export function usePsychometricTests() {
     addQuestion: (testId: string) => addQuestionMutation.mutate({ testId }),
     deleteQuestion: (testId: string, questionId: string) =>
       deleteQuestionMutation.mutate({ testId, questionId }),
-    deleteTest: deleteTestMutation.mutate,
   }
 }

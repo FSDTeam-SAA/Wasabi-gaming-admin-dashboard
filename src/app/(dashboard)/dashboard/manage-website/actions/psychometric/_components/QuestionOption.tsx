@@ -37,7 +37,7 @@ export function QuestionOption({
           type="text"
           value={option}
           onChange={e => onChange?.(e.target.value)}
-          className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+          className="flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-slate-300"
         />
       </div>
     )
@@ -45,15 +45,14 @@ export function QuestionOption({
 
   return (
     <div
-      className={`flex items-center gap-4 p-4 rounded-lg border-2 transition-all ${
-        isCorrect ? 'border-green-500 bg-green-50' : 'border-gray-200 bg-white'
-      }`}
+      className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${isCorrect ? 'border-[#FFFF00] bg-[#FFFF00]/10' : 'border-slate-100 bg-white'
+        }`}
     >
-      <div className="flex-none w-10 h-10 rounded-full flex items-center justify-center border-2 border-gray-300 font-bold">
+      <div className={`flex-none w-10 h-10 rounded-full flex items-center justify-center border text-sm font-bold ${isCorrect ? 'bg-[#FFFF00] border-[#FFFF00] text-black' : 'border-slate-200 text-slate-500'
+        }`}>
         {label}
       </div>
-      <p className="flex-1 font-medium">{option}</p>
-      {isCorrect && <CheckCircle2 className="w-6 h-6 text-green-600" />}
+      <p className={`flex-1 font-medium ${isCorrect ? 'text-foreground' : 'text-muted-foreground'}`}>{option}</p>
     </div>
   )
 }
