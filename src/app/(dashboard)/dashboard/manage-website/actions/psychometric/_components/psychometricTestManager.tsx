@@ -14,7 +14,7 @@ import { CategoryTab } from './categoryTab'
 import { Button } from '@/components/ui/button'
 
 export default function PsychometricTestManager() {
-  const [activeTab, setActiveTab] = useState('')
+  const [activeTab, setActiveTab] = useState(CATEGORIES[0].id)
   const [editingTest, setEditingTest] = useState<{
     testId: string
     questionId: string
@@ -28,16 +28,17 @@ export default function PsychometricTestManager() {
     updateQuestion,
     addQuestion,
     deleteQuestion,
-    deleteTest,
   } = usePsychometricTests()
 
   useEffect(() => {
-    if (tests.length > 0 && !activeTab) {
-      const firstCategory = CATEGORIES.find(c =>
+    if (tests.length > 0 && activeTab === CATEGORIES[0].id) {
+      const existingCategory = CATEGORIES.find(c =>
         tests.some(t => t.category === c.apiName),
       )
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveTab(firstCategory?.id || CATEGORIES[0].id)
+      if (existingCategory) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setActiveTab(existingCategory.id)
+      }
     }
   }, [tests, activeTab])
 
@@ -65,16 +66,6 @@ export default function PsychometricTestManager() {
   const handleDelete = (testId: string, questionId: string) => {
     if (confirm('Are you sure you want to delete this question?')) {
       deleteQuestion(testId, questionId)
-    }
-  }
-
-  const handleDeleteTest = (testId: string) => {
-    if (
-      confirm(
-        'Are you sure you want to delete this entire test? This action cannot be undone.',
-      )
-    ) {
-      deleteTest(testId)
     }
   }
 
@@ -127,23 +118,27 @@ export default function PsychometricTestManager() {
                 onSave={handleSave}
                 onDelete={handleDelete}
                 onAddQuestion={addQuestion}
-                onDeleteTest={handleDeleteTest}
                 saving={isSaving}
               />
             )
           })}
         </Tabs>
 
-        <div className="flex justify-end gap-2 pt-4 border-t mt-6">
-          <Button variant="outline" onClick={() => window.history.back()}>
+        <div className="flex justify-center items-center gap-4 pt-8 border-t mt-10">
+          <Button
+            className="!w-auto inline-flex rounded-full py-3 px-10 font-semibold"
+            onClick={() => window.history.back()}
+          >
             Cancel
           </Button>
+
           <Button
+            className="!w-auto inline-flex bg-[#FFFF00] text-black hover:bg-[#E6E600] rounded-full px-10 py-3 font-bold shadow-none"
             onClick={() =>
               toast.success('All changes are automatically saved!')
             }
           >
-            Done
+            Save Changes
           </Button>
         </div>
       </div>

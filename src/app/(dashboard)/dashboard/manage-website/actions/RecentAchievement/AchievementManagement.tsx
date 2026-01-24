@@ -158,7 +158,7 @@ export function AchievementManagement() {
                 </div>
                 <Button
                     onClick={() => { resetForm(); setIsModalOpen(true); }}
-                    className="bg-[#FFEF00] text-black hover:bg-[#E6D700] rounded-full px-6 font-bold"
+                    className="bg-[#FFFF00] text-black hover:bg-[#E6E600] rounded-full px-6 font-bold"
                 >
                     <Plus className="w-4 h-4 mr-2" /> Add Achievement
                 </Button>
@@ -168,10 +168,10 @@ export function AchievementManagement() {
                 <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow>
-                            <TableHead className="w-[120px] text-[20px] font-bold text-foreground">Preview</TableHead>
-                            <TableHead className="text-[20px] font-bold text-foreground">Achievement</TableHead>
-                            <TableHead className="text-[20px] font-bold text-foreground">Category</TableHead>
-                            <TableHead className="text-right text-[20px] font-bold text-foreground">Actions</TableHead>
+                            <TableHead className="w-[120px] text-[18px] font-bold text-foreground">Preview</TableHead>
+                            <TableHead className="text-[18px] font-bold text-foreground">Achievement</TableHead>
+                            <TableHead className="text-[18px] font-bold text-foreground">Category</TableHead>
+                            <TableHead className="text-right text-[18px] font-bold text-foreground">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -200,12 +200,12 @@ export function AchievementManagement() {
                                     </TableCell>
                                     <TableCell>
                                         <div className="space-y-1">
-                                            <div className="text-[18px] font-bold text-foreground">{item.title}</div>
-                                            <div className="text-[16px] text-muted-foreground line-clamp-1">{item.description}</div>
+                                            <div className="text-base font-bold text-foreground">{item.title}</div>
+                                            <div className="text-sm text-muted-foreground line-clamp-1">{item.description}</div>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="text-[18px] font-semibold text-muted-foreground">{item.subtitle}</div>
+                                        <div className="text-base font-semibold text-muted-foreground">{item.subtitle}</div>
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
@@ -298,7 +298,7 @@ export function AchievementManagement() {
                             <Button
                                 type="submit"
                                 disabled={submitting}
-                                className="bg-[#FFEF00] text-black hover:bg-[#E6D700] rounded-full px-10 font-bold h-12 shadow-none"
+                                className="bg-[#FFFF00] text-black hover:bg-[#E6E600] rounded-full px-10 font-bold h-12 shadow-none"
                             >
                                 {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                                 {editingItem ? "Update Changes" : "Save Achievement"}

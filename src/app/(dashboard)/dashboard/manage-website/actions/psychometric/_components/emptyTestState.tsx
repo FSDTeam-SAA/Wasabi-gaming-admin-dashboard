@@ -23,13 +23,13 @@ export function EmptyTestState({ onCreateTest, saving }: EmptyTestStateProps) {
             Create a test for this category to get started
           </p>
         </div>
-        <Button onClick={onCreateTest} disabled={saving}>
+        <Button onClick={onCreateTest} disabled={saving} className="bg-[#FFFF00] text-black hover:bg-[#E6E600] rounded-full px-8 font-bold h-12">
           {saving ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : (
             <Plus className="w-4 h-4 mr-2" />
           )}
-          Create Test
+          Create Section
         </Button>
       </div>
     </Card>

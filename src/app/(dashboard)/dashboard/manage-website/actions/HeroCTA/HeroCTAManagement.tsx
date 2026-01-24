@@ -187,7 +187,7 @@ export function HeroCTAManagement() {
                 </div>
                 <Button
                     onClick={() => { resetForm(); setIsModalOpen(true); }}
-                    className="bg-[#FFEF00] text-black hover:bg-[#E6D700] rounded-full px-6 font-medium"
+                    className="bg-[#FFFF00] text-black hover:bg-[#E6E600] rounded-full px-6 font-medium"
                 >
                     <Plus className="w-4 h-4 mr-2" /> Add New
                 </Button>
@@ -197,11 +197,11 @@ export function HeroCTAManagement() {
                 <Table>
                     <TableHeader className="bg-muted/50">
                         <TableRow>
-                            <TableHead className="w-[150px] text-[20px] font-bold text-foreground">Type</TableHead>
-                            <TableHead className="text-[20px] font-bold text-foreground">Title</TableHead>
-                            <TableHead className="text-[20px] font-bold text-foreground">Subtitle</TableHead>
-                            <TableHead className="text-[20px] font-bold text-foreground">Description</TableHead>
-                            <TableHead className="text-right text-[20px] font-bold text-foreground">Actions</TableHead>
+                            <TableHead className="w-[150px] text-[18px] font-bold text-foreground">Type</TableHead>
+                            <TableHead className="text-[18px] font-bold text-foreground">Title</TableHead>
+                            <TableHead className="text-[18px] font-bold text-foreground">Subtitle</TableHead>
+                            <TableHead className="text-[18px] font-bold text-foreground">Description</TableHead>
+                            <TableHead className="text-right text-[18px] font-bold text-foreground">Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -224,14 +224,14 @@ export function HeroCTAManagement() {
                         ) : (
                             items.map((item) => (
                                 <TableRow key={item._id} className="hover:bg-muted/30 transition-colors">
-                                    <TableCell className="text-[18px]">
+                                    <TableCell className="text-base">
                                         <span className="bg-primary/10 text-primary text-[12px] uppercase font-bold px-2 py-1 rounded">
                                             {item.type?.replace("-", " ")}
                                         </span>
                                     </TableCell>
-                                    <TableCell className="font-bold text-[18px] max-w-[150px] truncate">{item.title}</TableCell>
-                                    <TableCell className="text-muted-foreground text-[18px] font-semibold max-w-[150px] truncate">{item.subtitle}</TableCell>
-                                    <TableCell className="text-muted-foreground text-[18px] max-w-[200px] truncate">{item.description}</TableCell>
+                                    <TableCell className="font-bold text-base max-w-[150px] truncate">{item.title}</TableCell>
+                                    <TableCell className="text-muted-foreground text-base font-semibold max-w-[150px] truncate">{item.subtitle}</TableCell>
+                                    <TableCell className="text-muted-foreground text-base max-w-[200px] truncate">{item.description}</TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-1">
                                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => { setViewingItem(item); setIsViewModalOpen(true); }}>
@@ -363,7 +363,7 @@ export function HeroCTAManagement() {
                             <Button
                                 type="submit"
                                 disabled={submitting}
-                                className="bg-[#FFEF00] text-black hover:bg-[#E6D700] rounded-full px-8 font-medium shadow-none"
+                                className="bg-[#FFFF00] text-black hover:bg-[#E6E600] rounded-full px-8 font-medium shadow-none"
                             >
                                 {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                                 {editingItem ? "Update Changes" : "Create Section"}
@@ -393,7 +393,7 @@ export function HeroCTAManagement() {
                             <p className="text-xl text-muted-foreground leading-relaxed">{viewingItem.description}</p>
                             <div className="flex gap-3">
                                 {viewingItem.primaryButton && (
-                                    <Button className="bg-[#FFEF00] text-black hover:bg-[#E6D700] rounded-full px-6 font-medium shadow-none">
+                                    <Button className="bg-[#FFFF00] text-black hover:bg-[#E6E600] rounded-full px-6 font-medium shadow-none">
                                         {viewingItem.primaryButton}
                                     </Button>
                                 )}
