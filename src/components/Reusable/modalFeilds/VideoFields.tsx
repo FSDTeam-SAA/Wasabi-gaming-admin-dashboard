@@ -288,13 +288,12 @@ const CourseFields = ({ formData, onChange, edit = false }) => {
                             <SelectValue placeholder="Select grade" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="grade 6">Grade 6</SelectItem>
-                            <SelectItem value="grade 7">Grade 7</SelectItem>
-                            <SelectItem value="grade 8">Grade 8</SelectItem>
-                            <SelectItem value="grade 9">Grade 9</SelectItem>
-                            <SelectItem value="grade 10">Grade 10</SelectItem>
-                            <SelectItem value="grade 11">Grade 11</SelectItem>
-                            <SelectItem value="grade 12">Grade 12</SelectItem>
+                            <SelectContent>
+                                <SelectItem value="Year 9th">Year 9th</SelectItem>
+                                <SelectItem value=" Year 10th">Year 10th</SelectItem>
+                                <SelectItem value=" Year 11th"> Year 11th</SelectItem>
+                                <SelectItem value=" Year 12th"> Year 12th</SelectItem>
+                            </SelectContent>
                         </SelectContent>
                     </Select>
                 </div>

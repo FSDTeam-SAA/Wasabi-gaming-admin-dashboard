@@ -47,10 +47,10 @@ const StudentForm = ({ formData, onChange }) => {
                             <SelectValue placeholder="Select grade" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Grade 1">Grade 1</SelectItem>
-                            <SelectItem value="Grade 2">Grade 2</SelectItem>
-                            <SelectItem value="Grade 3">Grade 3</SelectItem>
-                            <SelectItem value="Grade 4">Grade 4</SelectItem>
+                            <SelectItem value="Year 9th">Year 9th</SelectItem>
+                            <SelectItem value=" Year 10th">Year 10th</SelectItem>
+                            <SelectItem value=" Year 11th"> Year 11th</SelectItem>
+                            <SelectItem value=" Year 12th"> Year 12th</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
