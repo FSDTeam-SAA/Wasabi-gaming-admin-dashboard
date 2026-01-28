@@ -35,25 +35,25 @@ const StudentForm = ({ formData, onChange }) => {
         />
       </div>
 
-      {/* Grade Level & Status */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Year Level</Label>
-          <Select
-            value={formData.year || ''}
-            onValueChange={value => onChange('year', value)}
-          >
-            <SelectTrigger className="bg-white">
-              <SelectValue placeholder="Select year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Year 1">Year 1</SelectItem>
-              <SelectItem value="Year 2">Year 2</SelectItem>
-              <SelectItem value="Year 3">Year 3</SelectItem>
-              <SelectItem value="Year 4">Year 4</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+            {/* Grade Level & Status */}
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                    <Label>Grade Level</Label>
+                    <Select
+                        value={formData.grade || ""}
+                        onValueChange={(value) => onChange("grade", value)}
+                    >
+                        <SelectTrigger className="bg-white">
+                            <SelectValue placeholder="Select grade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="Year 9th">Year 9th</SelectItem>
+                            <SelectItem value=" Year 10th">Year 10th</SelectItem>
+                            <SelectItem value=" Year 11th"> Year 11th</SelectItem>
+                            <SelectItem value=" Year 12th"> Year 12th</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
 
         <div className="space-y-2">
           <Label>Status</Label>
