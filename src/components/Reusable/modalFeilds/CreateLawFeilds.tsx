@@ -60,6 +60,14 @@ const CreateLawFields: React.FC<CreateLawFeildsProps> = ({
   const [internshipOpportunities, setInternshipOpportunities] = useState<string[]>([]);
   const [currentOpportunity, setCurrentOpportunity] = useState("");
 
+  // Culture And Value
+  const [cultureAndValue, setCultureAndValue] = useState<string[]>([]);
+  const [currentCulture, setCurrentCulture] = useState("");
+
+  // Benefits And Perks
+  const [benefitsAndPerks, setBenefitsAndPerks] = useState<string[]>([]);
+  const [currentBenefit, setCurrentBenefit] = useState("");
+
   // Load data only when firm changes (very important → prevents infinite loop)
   useEffect(() => {
     if (!currentData?._id) return;
@@ -79,6 +87,16 @@ const CreateLawFields: React.FC<CreateLawFeildsProps> = ({
       setInternshipOpportunities(currentData.internshipOpportunities);
     }
 
+    // Culture And Value
+    if (Array.isArray(currentData.cultureAndValue)) {
+      setCultureAndValue(currentData.cultureAndValue);
+    }
+
+    // Benefits And Perks
+    if (Array.isArray(currentData.benefitsAndPerks)) {
+      setBenefitsAndPerks(currentData.benefitsAndPerks);
+    }
+
   }, [currentData?._id]); // ← only run when the firm ID changes
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,6 +113,14 @@ const CreateLawFields: React.FC<CreateLawFeildsProps> = ({
     }
 
     setErrors({ ...errors, coverImage: "" });
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    
     onChange("coverImage", file);
   };
 
@@ -146,7 +172,9 @@ const CreateLawFields: React.FC<CreateLawFeildsProps> = ({
         <div className="relative rounded-2xl overflow-hidden shadow-lg">
           {currentData.coverImage ? (
             <div className="relative h-64 md:h-80">
-              <img
+              <Image
+              width={300}
+              height={300}
                 src={currentData.coverImage}
                 alt="Cover"
                 className="w-full h-full object-cover"
@@ -511,6 +539,92 @@ const CreateLawFields: React.FC<CreateLawFeildsProps> = ({
                 type="button"
                 onClick={() => addItem(internshipOpportunities, setInternshipOpportunities, currentOpportunity, setCurrentOpportunity, "internshipOpportunities")}
                 disabled={disabled || !currentOpportunity.trim()}
+                className="px-5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+          </div>
+
+          <h1>Culture & Benefits</h1>
+
+          {/* Culture And Value - SEPARATE */}
+          <div className="space-y-2">
+            <Label>Culture And Value</Label>
+            {cultureAndValue.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+                {cultureAndValue.map((item, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-1.5 bg-green-100 text-green-800 rounded-full text-sm flex items-center gap-2"
+                  >
+                    {item}
+                    {!disabled && (
+                      <button
+                        type="button"
+                        onClick={() => removeItem(index, cultureAndValue, setCultureAndValue, "cultureAndValue")}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Teamwork, Innovation, Integrity..."
+                value={currentCulture}
+                onChange={(e) => setCurrentCulture(e.target.value)}
+                onKeyPress={(e) => handleKeyPress(e, () => addItem(cultureAndValue, setCultureAndValue, currentCulture, setCurrentCulture, "cultureAndValue"))}
+                disabled={disabled}
+              />
+              <button
+                type="button"
+                onClick={() => addItem(cultureAndValue, setCultureAndValue, currentCulture, setCurrentCulture, "cultureAndValue")}
+                disabled={disabled || !currentCulture.trim()}
+                className="px-5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                <Plus size={20} />
+              </button>
+            </div>
+          </div>
+
+          {/* Benefits And Perks - SEPARATE */}
+          <div className="space-y-2">
+            <Label>Benefits And Perks</Label>
+            {benefitsAndPerks.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 border rounded-lg bg-gray-50">
+                {benefitsAndPerks.map((item, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-1.5 bg-purple-100 text-purple-800 rounded-full text-sm flex items-center gap-2"
+                  >
+                    {item}
+                    {!disabled && (
+                      <button
+                        type="button"
+                        onClick={() => removeItem(index, benefitsAndPerks, setBenefitsAndPerks, "benefitsAndPerks")}
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="flex gap-2">
+              <Input
+                placeholder="Health Insurance, Flexible Hours, Remote Work..."
+                value={currentBenefit}
+                onChange={(e) => setCurrentBenefit(e.target.value)}
+                onKeyPress={(e) => handleKeyPress(e, () => addItem(benefitsAndPerks, setBenefitsAndPerks, currentBenefit, setCurrentBenefit, "benefitsAndPerks"))}
+                disabled={disabled}
+              />
+              <button
+                type="button"
+                onClick={() => addItem(benefitsAndPerks, setBenefitsAndPerks, currentBenefit, setCurrentBenefit, "benefitsAndPerks")}
+                disabled={disabled || !currentBenefit.trim()}
                 className="px-5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
               >
                 <Plus size={20} />
