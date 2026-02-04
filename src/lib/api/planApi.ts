@@ -11,8 +11,9 @@ export interface Plan {
   _id: string
   name: string
   price: number
-  type: 'mounth' | 'year'
+  type: 'mounth' | 'year' | 'weekly'
   features: string[]
+  subscriptionCategory?: string // Added subscriptionCategory
   createdAt: string
   updatedAt: string
   __v: number
@@ -21,15 +22,17 @@ export interface Plan {
 export interface CreatePlanPayload {
   name: string
   price: number
-  type: 'mounth' | 'year'
+  type: 'mounth' | 'year' | 'weekly'
   features: string[]
+  subscriptionCategory?: string // Added subscriptionCategory
 }
 
 export interface UpdatePlanPayload {
   name?: string
   price?: number
-  type?: 'mounth' | 'year'
+  type?: 'mounth' | 'year' | 'weekly'
   features?: string[]
+  subscriptionCategory?: string // Added subscriptionCategory
 }
 
 export interface PlansResponse {

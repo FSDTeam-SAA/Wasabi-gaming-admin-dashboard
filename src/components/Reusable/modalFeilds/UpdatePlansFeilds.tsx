@@ -1,7 +1,14 @@
 // modalFeilds/UpdatePlansFeilds.tsx
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface UpdatePlansFeildsProps {
   formData: any
@@ -22,6 +29,13 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
 }) => {
   const [featureInput, setFeatureInput] = useState('')
   const disabled = false
+
+  // Set default values for required fields that have visual defaults
+  useEffect(() => {
+    if (!formData.type) {
+      onChange('type', 'mounth')
+    }
+  }, []) // Run once on mount
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target
@@ -118,33 +132,46 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
           Billing Cycle{' '}
           <span className="text-gray-400 font-normal">(Optional)</span>
         </label>
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            onClick={() => onChange('type', 'mounth')}
-            className={`py-3 px-4 rounded-xl border transition-all duration-200 ${
-              formData.type === 'mounth' || !formData.type
-                ? 'border-yellow-400 bg-yellow-50 text-gray-900'
-                : 'border-gray-300 hover:border-gray-400 text-gray-700'
-            }`}
+        <div className="w-full">
+          <Select
+            value={formData.type || 'mounth'}
+            onValueChange={value => onChange('type', value)}
+            disabled={disabled}
           >
-            <div className="font-medium">Monthly</div>
-            <div className="text-xs text-gray-500 mt-1">Billed every month</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => onChange('type', 'year')}
-            className={`py-3 px-4 rounded-xl border transition-all duration-200 ${
-              formData.type === 'year'
-                ? 'border-yellow-400 bg-yellow-50 text-gray-900'
-                : 'border-gray-300 hover:border-gray-400 text-gray-700'
-            }`}
+            <SelectTrigger className="w-full h-[52px] rounded-xl border-gray-300 focus:ring-yellow-400">
+              <SelectValue placeholder="Select billing cycle" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="mounth">Monthly - Billed every month</SelectItem>
+              <SelectItem value="year">Yearly - Save with annual billing</SelectItem>
+              <SelectItem value="weekly">Weekly - Billed every week</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
+          Subscription Category
+          <span className="text-gray-400 font-normal ml-2">(Optional)</span>
+        </label>
+        <div className="w-full">
+          <Select
+            value={formData.subscriptionCategory || ''}
+            onValueChange={value => onChange('subscriptionCategory', value)}
+            disabled={disabled}
           >
-            <div className="font-medium">Yearly</div>
-            <div className="text-xs text-gray-500 mt-1">
-              Save with annual billing
-            </div>
-          </button>
+            <SelectTrigger className="w-full h-[52px] rounded-xl border-gray-300 focus:ring-yellow-400">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="students">Students</SelectItem>
+              <SelectItem value="school">School</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-gray-500 mt-2">
+            Select who this plan is designed for
+          </p>
         </div>
       </div>
 
@@ -209,7 +236,9 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
               <div className="text-sm text-gray-600">
                 {formData.type === 'year'
                   ? 'Yearly subscription'
-                  : 'Monthly subscription'}
+                  : formData.type === 'weekly'
+                    ? 'Weekly subscription'
+                    : 'Monthly subscription'}
               </div>
             </div>
             <div className="text-right">
@@ -217,7 +246,11 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
                 £{parseFloat(formData.price || 0).toFixed(2)}
               </div>
               <div className="text-sm text-gray-500">
-                {formData.type === 'year' ? 'per year' : 'per month'}
+                {formData.type === 'year'
+                  ? 'per year'
+                  : formData.type === 'weekly'
+                    ? 'per week'
+                    : 'per month'}
               </div>
             </div>
           </div>
