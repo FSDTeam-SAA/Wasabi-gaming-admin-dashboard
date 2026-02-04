@@ -85,6 +85,7 @@ const Premium = () => {
       price: Number(data.price),
       type: data.type,
       features: Array.isArray(data.features) ? data.features : [],
+      subscriptionCategory: data.subscriptionCategory,
     }
 
     if (editingPlan) {
@@ -201,11 +202,25 @@ const Premium = () => {
               {/* Delete Button - Top Right */}
               <button
                 onClick={() => handleDeleteClick(plan)}
-                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                className="absolute top-12 right-4 p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 opacity-0 group-hover:opacity-100 bg-white shadow-sm border border-gray-100 z-10"
                 title="Delete plan"
               >
                 <Trash2 size={18} />
               </button>
+
+              {/* Category Badge */}
+              {plan.subscriptionCategory && (
+                <div className="absolute top-4 right-4">
+                  <span
+                    className={`px-3 py-1 text-[10px] uppercase tracking-wider font-bold rounded-full border ${plan.subscriptionCategory === 'students'
+                      ? 'bg-blue-50 text-blue-600 border-blue-100'
+                      : 'bg-purple-50 text-purple-600 border-purple-100'
+                      }`}
+                  >
+                    {plan.subscriptionCategory}
+                  </span>
+                </div>
+              )}
 
               <div>
                 <div className="flex justify-between items-start mb-4">
@@ -214,7 +229,11 @@ const Premium = () => {
                       {plan.name}
                     </h3>
                     <p className="text-sm text-gray-500 mb-3">
-                      {plan.type === 'mounth' ? 'Monthly Plan' : 'Yearly Plan'}
+                      {plan.type === 'mounth'
+                        ? 'Monthly Plan'
+                        : plan.type === 'weekly'
+                          ? 'Weekly Plan'
+                          : 'Yearly Plan'}
                     </p>
                   </div>
                 </div>
@@ -225,7 +244,11 @@ const Premium = () => {
                       £ {plan.price}
                     </p>
                     <p className="text-sm text-gray-500">
-                      /{plan.type === 'mounth' ? 'month' : 'year'}
+                      /{plan.type === 'mounth'
+                        ? 'month'
+                        : plan.type === 'weekly'
+                          ? 'week'
+                          : 'year'}
                     </p>
                   </div>
                   {plan.type === 'year' && (
