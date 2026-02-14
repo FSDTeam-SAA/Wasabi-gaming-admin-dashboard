@@ -7,7 +7,7 @@ import { WebsiteSection } from './types'
 import { websiteApi } from './services/website.api'
 import { Loader2 } from 'lucide-react'
 
-import { HeroCTAManagement } from './actions/HeroCTA/HeroCTAManagement'
+// import { HeroCTAManagement } from './actions/HeroCTA/HeroCTAManagement'
 import { TeamManagement } from './actions/Team/TeamManagement'
 import { AchievementManagement } from './actions/RecentAchievement/AchievementManagement'
 import { ArrowLeft } from 'lucide-react'
@@ -34,7 +34,7 @@ export default function ManageWebsitePage() {
 
         <div className="bg-card border rounded-xl p-6 shadow-sm">
           {selectedSection === 'psychometric' && <PsychometricTestManager />}
-          {selectedSection === 'hero' && <HeroCTAManagement />}
+          {/* {selectedSection === 'hero' && <HeroCTAManagement />} */}
           {selectedSection === 'team' && <TeamManagement />}
           {selectedSection === 'achievements' && <AchievementManagement />}
         </div>
