@@ -12,13 +12,13 @@ import {
 import { WebsiteSection } from './types'
 
 export const SECTION_CONFIG = [
-  {
-    key: 'hero',
-    type: 'hero',
-    title: 'Hero / CTA Section',
-    description: 'Edit the main hero section title, subtitle, and CTA buttons.',
-    icon: LayoutTemplate,
-  },
+  // {
+  //   key: 'hero',
+  //   type: 'hero',
+  //   title: 'Hero / CTA Section',
+  //   description: 'Edit the main hero section title, subtitle, and CTA buttons.',
+  //   icon: LayoutTemplate,
+  // },
   {
     key: 'team',
     type: 'team',
