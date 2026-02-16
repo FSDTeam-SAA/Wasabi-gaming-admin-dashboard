@@ -92,7 +92,7 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        onStatusChange("Approved");
+        onStatusChange("accepted");
       }
     });
   };
@@ -118,7 +118,7 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        onStatusChange("Rejected");
+        onStatusChange("rejected");
       }
     });
   };
@@ -317,15 +317,15 @@ const ManageSchool = () => {
 
   // Update school status (PUT)
   const updateSchoolMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string | number; status: string }) => {
-      const token = localStorage.getItem("token") || "";
+    mutationFn: async ({ id, schoolStatus }: { id: string | number; schoolStatus: string }) => {
+      // const token = localStorage.getItem("token") || "";
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/user/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${TOKEN}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ schoolStatus }),
       });
 
       if (!response.ok) {
@@ -398,7 +398,7 @@ const ManageSchool = () => {
   };
 
   const handleStatusChange = (id: string | number, newStatus: string) => {
-    updateSchoolMutation.mutate({ id, status: newStatus });
+    updateSchoolMutation.mutate({ id, schoolStatus: newStatus });
   };
 
   if (isLoading) {
