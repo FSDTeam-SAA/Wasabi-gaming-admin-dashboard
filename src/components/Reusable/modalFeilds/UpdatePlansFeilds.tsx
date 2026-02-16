@@ -33,7 +33,7 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
   // Set default values for required fields that have visual defaults
   useEffect(() => {
     if (!formData.type) {
-      onChange('type', 'mounth')
+      onChange('type', 'monthly')
     }
   }, []) // Run once on mount
 
@@ -80,19 +80,20 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
           </label>
           <span className="text-xs text-gray-400">Required</span>
         </div>
-        <input
-          type="text"
-          name="name"
+        <Select
           value={formData.name || ''}
-          onChange={handleInputChange}
-          placeholder="e.g., Premium Plan, Basic Plan, Enterprise"
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-200 hover:border-gray-400 placeholder:text-gray-400"
+          onValueChange={value => onChange('name', value)}
           disabled={disabled}
-          required
-        />
-        <p className="text-xs text-gray-500">
-          Choose a descriptive name for your plan
-        </p>
+        >
+          <SelectTrigger className="w-full h-[52px] rounded-xl border-gray-300 focus:ring-yellow-400">
+            <SelectValue placeholder="Select plan name" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pro">Pro</SelectItem>
+            <SelectItem value="free">Free</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-gray-500">Choose the plan tier</p>
       </div>
 
       <div className="space-y-2">
@@ -134,7 +135,7 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
         </label>
         <div className="w-full">
           <Select
-            value={formData.type || 'mounth'}
+            value={formData.type || 'monthly'}
             onValueChange={value => onChange('type', value)}
             disabled={disabled}
           >
@@ -142,8 +143,12 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
               <SelectValue placeholder="Select billing cycle" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="mounth">Monthly - Billed every month</SelectItem>
-              <SelectItem value="year">Yearly - Save with annual billing</SelectItem>
+              <SelectItem value="monthly">
+                Monthly - Billed every month
+              </SelectItem>
+              <SelectItem value="yearly">
+                Yearly - Save with annual billing
+              </SelectItem>
               <SelectItem value="weekly">Weekly - Billed every week</SelectItem>
             </SelectContent>
           </Select>
