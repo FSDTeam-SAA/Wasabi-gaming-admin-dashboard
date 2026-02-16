@@ -339,7 +339,7 @@ const CourseEditModal = ({
                     {/* Grade, Category, Price */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <Label>Grade Level *</Label>
+                            <Label>Year Group *</Label>
                             <Select
                                 value={formData.grade}
                                 onValueChange={(value) => handleChange("grade", value)}
@@ -349,10 +349,11 @@ const CourseEditModal = ({
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectContent>
-                                        <SelectItem value="Year 9th">Year 9th</SelectItem>
-                                        <SelectItem value=" Year 10th">Year 10th</SelectItem>
-                                        <SelectItem value=" Year 11th"> Year 11th</SelectItem>
-                                        <SelectItem value=" Year 12th"> Year 12th</SelectItem>
+                                        <SelectContent>
+                                            <SelectItem value="Year 9">Year 9</SelectItem>
+                                            <SelectItem value="Year 10">Year 10</SelectItem>
+                                            <SelectItem value="Year 11">Year 11</SelectItem>
+                                        </SelectContent>
                                     </SelectContent>
                                 </SelectContent>
                             </Select>
