@@ -195,23 +195,29 @@ const ManageLawFirms = () => {
     }
 
     const payloadData = {
-      firmType: "Law Firm",
-      firmName: rawData.firmName || "",
-      aboutFirm: rawData.aboutFirm || "",
-      location: rawData.location || "",
-      foundationYear: Number(rawData.foundationYear) || null,
-      employees: Number(rawData.employees) || 0,
-      website: rawData.website || "",
-      email: rawData.email || "",
-      phoneNumber: rawData.phoneNumber || "",
-      tags: Array.isArray(rawData.tags) ? rawData.tags : [],
-      practiceAreas: rawData.practiceAreas || "",
-      keyHighlights: rawData.keyHighlights || "",
-      internshipOpportunities: Array.isArray(rawData.internshipOpportunities)
-        ? rawData.internshipOpportunities
-        : [],
-      description: rawData.description || "",
-    };
+  firmType: "Law Firm",
+  firmName: rawData.firmName || "",
+  aboutFirm: rawData.aboutFirm || "",
+  location: rawData.location || "",
+  foundationYear: Number(rawData.foundationYear) || null,
+  employees: Number(rawData.employees) || 0,
+  website: rawData.website || "",
+  email: rawData.email || "",
+  phoneNumber: rawData.phoneNumber || "",
+  tags: Array.isArray(rawData.tags) ? rawData.tags : [],
+  practiceAreas: rawData.practiceAreas || "",
+  keyHighlights: rawData.keyHighlights || "",
+  internshipOpportunities: Array.isArray(rawData.internshipOpportunities)
+    ? rawData.internshipOpportunities
+    : [],
+  cultureAndValue: Array.isArray(rawData.cultureAndValue)
+    ? rawData.cultureAndValue
+    : [],
+  benefitsAndPerks: Array.isArray(rawData.benefitsAndPerks)
+    ? rawData.benefitsAndPerks
+    : [],
+  description: rawData.description || "",
+};
 
     formData.append("data", JSON.stringify(payloadData));
 
