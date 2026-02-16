@@ -229,7 +229,7 @@ const Premium = () => {
                       {plan.name}
                     </h3>
                     <p className="text-sm text-gray-500 mb-3">
-                      {plan.type === 'mounth'
+                      {plan.type === 'monthly'
                         ? 'Monthly Plan'
                         : plan.type === 'weekly'
                           ? 'Weekly Plan'
@@ -243,15 +243,18 @@ const Premium = () => {
                     <p className="text-3xl font-bold text-gray-900">
                       £ {plan.price}
                     </p>
-                    <p className="text-sm text-gray-500">
-                      /{plan.type === 'mounth'
-                        ? 'month'
-                        : plan.type === 'weekly'
-                          ? 'week'
-                          : 'year'}
-                    </p>
+                    {plan.name !== 'free' && (
+                      <p className="text-sm text-gray-500">
+                        /
+                        {plan.type === 'monthly'
+                          ? 'month'
+                          : plan.type === 'weekly'
+                            ? 'week'
+                            : 'year'}
+                      </p>
+                    )}
                   </div>
-                  {plan.type === 'year' && (
+                  {plan.type === 'yearly' && (
                     <p className="text-sm text-gray-600 mt-1">
                       <span className="text-green-600 font-medium">
                         £ {Math.round(plan.price / 12)}/month

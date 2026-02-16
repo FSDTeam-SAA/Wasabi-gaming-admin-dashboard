@@ -9,9 +9,9 @@ export interface PlanFeature {
 
 export interface Plan {
   _id: string
-  name: string
+  name: 'pro' | 'free'
   price: number
-  type: 'mounth' | 'year' | 'weekly'
+  type: 'monthly' | 'yearly' | 'weekly'
   features: string[]
   subscriptionCategory?: string // Added subscriptionCategory
   createdAt: string
@@ -20,17 +20,17 @@ export interface Plan {
 }
 
 export interface CreatePlanPayload {
-  name: string
+  name: 'pro' | 'free'
   price: number
-  type: 'mounth' | 'year' | 'weekly'
+  type: 'monthly' | 'yearly' | 'weekly'
   features: string[]
   subscriptionCategory?: string // Added subscriptionCategory
 }
 
 export interface UpdatePlanPayload {
-  name?: string
+  name?: 'pro' | 'free'
   price?: number
-  type?: 'mounth' | 'year' | 'weekly'
+  type?: 'monthly' | 'yearly' | 'weekly'
   features?: string[]
   subscriptionCategory?: string // Added subscriptionCategory
 }
