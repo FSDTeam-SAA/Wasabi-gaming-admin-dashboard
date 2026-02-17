@@ -9,6 +9,10 @@ export const metadata = {
   description: "Wasabi Dashboard Application",
 };
 
+
+
+
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
