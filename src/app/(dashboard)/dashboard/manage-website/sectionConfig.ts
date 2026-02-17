@@ -40,4 +40,11 @@ export const SECTION_CONFIG = [
     description: 'Preview and edit psychometric test questions.',
     icon: BrainCircuit,
   },
+  {
+    key: 'launch-career',
+    type: 'launch-career',
+    title: 'Launch Your Career',
+    description: 'Manage Student and School career launch items.',
+    icon: MonitorPlay,
+  },
 ] as const

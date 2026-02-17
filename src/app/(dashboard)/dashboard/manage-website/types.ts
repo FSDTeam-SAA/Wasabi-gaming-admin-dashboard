@@ -55,3 +55,11 @@ export interface PsychometricTab {
   label: string;
   questions: Question[]; // For UI demo
 }
+
+export interface LaunchCareerItem {
+  _id: string;
+  title: string;
+  image: string;
+  category: 'student' | 'school';
+  status: string;
+}

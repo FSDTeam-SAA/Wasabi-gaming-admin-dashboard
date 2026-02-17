@@ -13,6 +13,7 @@ import { AchievementManagement } from './actions/RecentAchievement/AchievementMa
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import PsychometricTestManager from './actions/psychometric/_components/psychometricTestManager'
+import { LaunchCareerManagement } from './actions/LaunchCareer/LaunchCareerManagement'
 
 export default function ManageWebsitePage() {
   const [selectedSection, setSelectedSection] = useState<string | null>(null)
@@ -34,6 +35,7 @@ export default function ManageWebsitePage() {
 
         <div className="bg-card border rounded-xl p-6 shadow-sm">
           {selectedSection === 'psychometric' && <PsychometricTestManager />}
+          {selectedSection === 'launch-career' && <LaunchCareerManagement />}
           {/* {selectedSection === 'hero' && <HeroCTAManagement />} */}
           {selectedSection === 'team' && <TeamManagement />}
           {selectedSection === 'achievements' && <AchievementManagement />}
