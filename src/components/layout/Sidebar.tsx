@@ -31,7 +31,11 @@ const sidebarItems = [
   { label: 'Quizzes', href: '/dashboard/quiz', icon: FileQuestion },
   { label: 'Manage Jobs', href: '/dashboard/manage-jobs', icon: ShoppingBag },
   { label: 'Manage Schools', href: '/dashboard/manage-schools', icon: School },
-  { label: 'Manage Law Firms', href: '/dashboard/manage-law-firms', icon: Gavel },
+  {
+    label: 'Manage Law Firms',
+    href: '/dashboard/manage-law-firms',
+    icon: Gavel,
+  },
   {
     label: 'Application Tracker',
     href: '/dashboard/application-tacker',
@@ -68,7 +72,7 @@ export default function Sidebar() {
 
         {/* Navigation */}
         <nav className="flex-1 space-y-1 px-4 mb-6">
-          {sidebarItems.map((item) => {
+          {sidebarItems.map(item => {
             // Exact match only
             const isActive = pathname === item.href
             return (
@@ -79,7 +83,7 @@ export default function Sidebar() {
                   'flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-medium transition-colors popreg',
                   isActive
                     ? 'bg-[#FEF9C2] text-black'
-                    : 'text-[#737373] hover:bg-gray-50 hover:text-black'
+                    : 'text-[#737373] hover:bg-gray-50 hover:text-black',
                 )}
               >
                 <item.icon className="h-[18px] w-[18px]" />

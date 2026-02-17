@@ -164,5 +164,32 @@ export const websiteApi = {
             headers,
         });
         return res.json();
+    },
+
+    // --- Launch Your Career Section (/dynamic-website) ---
+    getLaunchCareerItems: async (category?: string): Promise<{ success: boolean; data: any[] }> => {
+        const headers = await getAuthHeaders();
+        const url = category ? `${API_BASE_URL}/dynamic-website?category=${category}` : `${API_BASE_URL}/dynamic-website`;
+        const res = await fetch(url, { headers });
+        return res.json();
+    },
+
+    createLaunchCareerItem: async (formData: FormData): Promise<{ success: boolean; data: any }> => {
+        const headers = await getAuthHeaders(true);
+        const res = await fetch(`${API_BASE_URL}/dynamic-website`, {
+            method: 'POST',
+            headers,
+            body: formData,
+        });
+        return res.json();
+    },
+
+    deleteLaunchCareerItem: async (id: string): Promise<{ success: boolean }> => {
+        const headers = await getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/dynamic-website/${id}`, {
+            method: 'DELETE',
+            headers,
+        });
+        return res.json();
     }
 };
