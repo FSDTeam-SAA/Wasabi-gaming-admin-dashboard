@@ -27,7 +27,7 @@ import {
 import { Button } from '@/components/ui/button'
 import LoderComponent from '@/components/loader/LoderComponent'
 
-const filterOptions = ['All', '9th', '10th', '11th', '12th']
+const filterOptions = ['All', 'Year 9', 'Year 10', 'Year 11',]
 
 const Students = () => {
     const [open, setOpen] = useState(false)
