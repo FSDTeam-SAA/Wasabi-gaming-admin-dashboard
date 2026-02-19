@@ -5,7 +5,7 @@ import { Toaster } from "sonner";
 import TopLoader from "nextjs-toploader";
 
 export const metadata = {
-  title: "Wasabi - Dashboard",
+  title: "Aspiring Legal Network",
   description: "Wasabi Dashboard Application",
 };
 
