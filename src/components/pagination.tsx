@@ -15,6 +15,7 @@ interface ReusablePaginationProps {
   totalResults: number;
   resultsPerPage: number;
   onPageChange: (page: number) => void;
+  activePageClassName?: string;
 }
 
 export const ReusablePagination: React.FC<ReusablePaginationProps> = ({
@@ -23,6 +24,7 @@ export const ReusablePagination: React.FC<ReusablePaginationProps> = ({
   totalResults,
   resultsPerPage,
   onPageChange,
+  activePageClassName = "bg-teal-600 text-white border-teal-600",
 }) => {
   if (totalPages <= 1) return null;
 
@@ -84,7 +86,7 @@ export const ReusablePagination: React.FC<ReusablePaginationProps> = ({
                   onClick={() => onPageChange(page)}
                   className={`w-9 h-9 rounded-md border text-sm transition ${
                     currentPage === page
-                      ? "bg-teal-600 text-white border-teal-600"
+                      ? activePageClassName
                       : "border-gray-300 hover:bg-gray-100"
                   }`}
                 >
