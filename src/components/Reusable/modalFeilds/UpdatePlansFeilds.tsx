@@ -89,7 +89,7 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
             <SelectValue placeholder="Select plan name" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="pro">Pro</SelectItem>
+            <SelectItem value="premium">Premium</SelectItem>
             <SelectItem value="free">Free</SelectItem>
           </SelectContent>
         </Select>
