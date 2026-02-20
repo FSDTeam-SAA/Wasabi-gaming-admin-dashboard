@@ -14,6 +14,7 @@ import { FaPlus } from "react-icons/fa6";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import LoderComponent from "@/components/loader/LoderComponent";
+import { ReusablePagination } from "@/components/pagination";
 
 // Jobs Card Component (একদম অপরিবর্তিত)
 const JobsCard = ({
@@ -24,13 +25,19 @@ const JobsCard = ({
   onDelete,
   onView,
   onEdit,
+  onSelect,
+  isSelected,
 }) => {
-  const statusColor =
-    status === "Approved"
-      ? "bg-green-200 text-green-800"
-      : status === "Rejected"
-      ? "bg-red-200 text-red-800"
-      : "bg-yellow-200 text-yellow-800";
+ const displayStatus = status;  // যেমন আছে তেমনই রাখা
+
+const statusColor =
+  status === "active"
+    ? "bg-[#DCFCE7] text-[#008236]"
+    : status === "Approved"
+    ? "bg-green-200 text-green-800"
+    : status === "Rejected" || status === "Inactive" || status === "Closed"
+    ? "bg-red-200 text-red-800"
+    : "bg-yellow-200 text-yellow-800";   // default / pending
 
   const handleDelete = () => {
     Swal.fire({
@@ -77,7 +84,12 @@ const JobsCard = ({
   };
 
   return (
-    <div className="w-full bg-white shadow-sm rounded-2xl p-5 border border-gray-100 flex space-y-3 flex-col gap-3 hover:shadow-md transition-all duration-200">
+    <div
+      onClick={onSelect}
+      className={`w-full bg-white shadow-sm rounded-2xl p-5 border flex space-y-3 flex-col gap-3 hover:shadow-md transition-all duration-200 cursor-pointer ${
+        isSelected ? "border-[#FFFF00]" : "border-gray-100"
+      }`}
+    >
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <div className="p-3 bg-gray-100 rounded-full">
@@ -87,7 +99,7 @@ const JobsCard = ({
         <p
           className={`text-sm px-4 py-1 rounded-3xl font-medium ${statusColor}`}
         >
-          {status}
+          {displayStatus}
         </p>
       </div>
 
@@ -104,20 +116,29 @@ const JobsCard = ({
 
       <div className="flex items-center justify-between gap-3">
         <button
-          onClick={onView}
+          onClick={(e) => {
+            e.stopPropagation();
+            onView();
+          }}
           className="flex items-center justify-center gap-2 flex-1 border border-gray-300 py-[7px] rounded-3xl text-gray-700 font-medium hover:bg-gray-100 transition-all"
         >
           <FaEye size={19} className="text-gray-600" /> View
         </button>
         <button
-          onClick={onEdit}
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit();
+          }}
           className="flex items-center justify-center gap-2 flex-1 border border-gray-300 py-[7px] rounded-3xl text-gray-700 font-medium hover:bg-gray-100 transition-all"
         >
           <FaEdit size={19} className="text-gray-600" /> Edit
         </button>
 
         <button
-          onClick={handleDelete}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDelete();
+          }}
           className="flex items-center justify-center border border-gray-200 rounded-full p-3 hover:bg-red-50 hover:border-red-200 hover:text-red-600 transition-all duration-200 text-gray-500"
         >
           <FaTrash size={15} />
@@ -129,9 +150,11 @@ const JobsCard = ({
 
 const ManageJobs = () => {
   const [selectedJob, setSelectedJob] = useState<any>(null);
+  const [selectedJobId, setSelectedJobId] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { data: session } = useSession();
   const TOKEN = session?.user?.accessToken || "";
@@ -140,13 +163,54 @@ const ManageJobs = () => {
 
   // Fetch jobs
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["jobs"],
+    queryKey: ["jobs", TOKEN],
     queryFn: async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/job`);
-      if (!res.ok) throw new Error("Failed to fetch jobs");
-      const result = await res.json();
-      return result.data;
+      const limit = 100;
+      const headers: HeadersInit = {
+        "Content-Type": "application/json",
+      };
+
+      if (TOKEN) headers.Authorization = `Bearer ${TOKEN}`;
+
+      const fetchJobsPage = async (page: number) => {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/job?page=${page}&limit=${limit}`,
+          { headers }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch jobs");
+        return res.json();
+      };
+
+      const firstResult = await fetchJobsPage(1);
+      const firstPageJobs = Array.isArray(firstResult?.data)
+        ? firstResult.data
+        : Array.isArray(firstResult?.data?.data)
+        ? firstResult.data.data
+        : [];
+
+      const meta = firstResult?.meta || firstResult?.data?.meta || {};
+      const totalPages =
+        Number(meta?.totalPage || meta?.totalPages) ||
+        (meta?.total ? Math.ceil(Number(meta.total) / limit) : 1);
+
+      if (totalPages <= 1) return firstPageJobs;
+
+      const remainingPages = await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, i) => fetchJobsPage(i + 2))
+      );
+
+      const remainingJobs = remainingPages.flatMap((result: any) =>
+        Array.isArray(result?.data)
+          ? result.data
+          : Array.isArray(result?.data?.data)
+          ? result.data.data
+          : []
+      );
+
+      return [...firstPageJobs, ...remainingJobs];
     },
+    enabled: !!TOKEN,
   });
 
   // Create New Job Mutation
@@ -276,11 +340,59 @@ const ManageJobs = () => {
     },
   });
 
+  // Approve Job Mutation
+  const approveJobMutation = useMutation({
+    mutationFn: async (jobId: string) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/job/approved/${jobId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || "Failed to approve job");
+      }
+
+      return res.json();
+    },
+    onSuccess: () => {
+      Swal.fire({
+        title: "Approved!",
+        text: "Job approved successfully",
+        icon: "success",
+        confirmButtonText: "OK",
+      });
+      setSelectedJobId("");
+      queryClient.invalidateQueries({ queryKey: ["jobs"] });
+    },
+    onError: (err: any) => {
+      Swal.fire({
+        title: "Error",
+        text: err.message || "Could not approve job. Please try again.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+    },
+  });
+
+  const jobs = data || [];
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(jobs.length / itemsPerPage);
+  const safeCurrentPage = totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
+  const paginatedJobs = jobs.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  );
+
   // Loading & Error states
   if (isLoading) return <LoderComponent />;
   if (isError) return <div className="text-center py-10 text-red-600">Error loading jobs...</div>;
-
-  const jobs = data || [];
 
   const handleDeleteJob = (jobId: string) => {
     Swal.fire({
@@ -311,6 +423,15 @@ const ManageJobs = () => {
 
   const handleCloseCreateModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleSelectJob = (jobId: string) => {
+    setSelectedJobId((prev) => (prev === jobId ? "" : jobId));
+  };
+
+  const handleApproveJob = () => {
+    if (!selectedJobId) return;
+    approveJobMutation.mutate(selectedJobId);
   };
 
   // Create or Update handler – এখন পেলোড সঠিকভাবে ম্যাপ করে পাঠানো হচ্ছে
@@ -358,12 +479,23 @@ const ManageJobs = () => {
       <div className="flex justify-between items-center">
         <Headers title={"Manage Jobs"} subHeader={"Approve all jobs"} />
 
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex gap-2 items-center bg-[#FFFF00] hover:bg-yellow-500 py-3 rounded-xl px-6 shadow-sm hover:shadow-md transition-all duration-300 font-semibold text-gray-900 hover:scale-105"
-        >
-          <FaPlus /> Add Jobs
-        </button>
+        <div className="flex items-center gap-3">
+          {selectedJobId && (
+            <button
+              onClick={handleApproveJob}
+              disabled={approveJobMutation.isPending}
+              className="flex gap-2 items-center bg-[#FFFF00] hover:bg-yellow-500 py-3 rounded-xl px-6 shadow-sm hover:shadow-md transition-all duration-300 font-semibold text-gray-900 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {approveJobMutation.isPending ? "Approving..." : "Approve Jobs"}
+            </button>
+          )}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex gap-2 items-center bg-[#FFFF00] hover:bg-yellow-500 py-3 rounded-xl px-6 shadow-sm hover:shadow-md transition-all duration-300 font-semibold text-gray-900 hover:scale-105"
+          >
+            <FaPlus /> Add Jobs
+          </button>
+        </div>
       </div>
 
       {jobs.length === 0 ? (
@@ -372,23 +504,36 @@ const ManageJobs = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {jobs.map((job) => (
+          {paginatedJobs.map((job) => (
             <JobsCard
               key={job._id}
               company={job.companyName}
               position={job.title}
-              status={job.jobStatus || "Open"}
+              status={job.status }
               date={new Date(job.createdAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
               })}
+              onSelect={() => handleSelectJob(job._id)}
+              isSelected={selectedJobId === job._id}
               onDelete={() => handleDeleteJob(job._id)}
               onView={() => handleViewJob(job)}
               onEdit={() => handleEditJob(job)}
             />
           ))}
         </div>
+      )}
+
+      {jobs.length > itemsPerPage && (
+        <ReusablePagination
+          currentPage={safeCurrentPage}
+          totalPages={totalPages}
+          totalResults={jobs.length}
+          resultsPerPage={itemsPerPage}
+          onPageChange={(page) => setCurrentPage(Math.max(1, page))}
+          activePageClassName="bg-[#FFFF00] text-gray-900 border-[#FFFF00] hover:bg-yellow-400"
+        />
       )}
 
       {/* Create Modal */}
