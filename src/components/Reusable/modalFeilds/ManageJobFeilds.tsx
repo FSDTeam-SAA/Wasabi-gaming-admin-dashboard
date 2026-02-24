@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { debounce } from 'lodash'; // Make sure lodash is installed: npm install lodash
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { FaPlus } from "react-icons/fa6";
 import TextEditor from '../editor/EditSection';
 
 interface ManageJobFeildsProps {
@@ -30,18 +31,72 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
   job,
   onClose,
 }) => {
+  const [skillInput, setSkillInput] = useState("");
+
+  const normalizeSkills = (value: any) => {
+    if (Array.isArray(value)) {
+      return value.map((item: any) => String(item).trim()).filter(Boolean);
+    }
+
+    if (typeof value === "string") {
+      return value
+        .split(/[\n,]+/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+    }
+
+    return [];
+  };
+
+  const requiredSkills = useMemo(() => {
+    if (formData.requiredSkills !== undefined) {
+      return normalizeSkills(formData.requiredSkills);
+    }
+    if (edit && job?.requiredSkills) {
+      return normalizeSkills(job.requiredSkills);
+    }
+    return [];
+  }, [formData.requiredSkills, edit, job?.requiredSkills]);
+
   const handleInputChange = (field: string, value: any) => {
     onChange(field, value);
+  };
+
+  const handleAddSkill = () => {
+    const newSkill = skillInput.trim();
+    if (!newSkill) return;
+
+    const exists = requiredSkills.some(
+      (skill) => skill.toLowerCase() === newSkill.toLowerCase()
+    );
+    if (exists) {
+      setSkillInput("");
+      return;
+    }
+
+    handleInputChange("requiredSkills", [...requiredSkills, newSkill]);
+    setSkillInput("");
+  };
+
+  const handleRemoveSkill = (skillToRemove: string) => {
+    const updated = requiredSkills.filter((skill) => skill !== skillToRemove);
+    handleInputChange("requiredSkills", updated);
   };
 
   // IMPORTANT FIX: Debounce TextEditor onChange to prevent infinite re-render loop
   // This is the ONLY change - everything else is exactly the same
   const debouncedContentChange = useMemo(
     () => debounce((value: string) => {
-      onChange("content", value);
+      onChange("description", value);
     }, 500), // Wait 500ms after typing stops before updating state
     [onChange]
   );
+
+  useEffect(() => {
+    return () => {
+      debouncedContentChange.cancel();
+    };
+  }, [debouncedContentChange]);
 
   if (view) {
     const j = job || {}; // fallback if job is undefined
@@ -104,6 +159,10 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
               <p className="text-gray-600">{j.companyName || "—"}</p>
             </div>
             <div>
+              <p className="popmed text-[15px] font-medium">Company Type</p>
+              <p className="text-gray-600">{j.companyType || "—"}</p>
+            </div>
+            <div>
               <p className="popmed text-[15px] font-medium">Location</p>
               <p className="text-gray-600">{j.location || "—"}</p>
             </div>
@@ -111,6 +170,10 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
             <div>
               <p className="popmed text-[15px] font-medium">Posted By</p>
               <p className="text-gray-600">{j.postedBy || "—"}</p>
+            </div>
+            <div>
+              <p className="popmed text-[15px] font-medium">Status</p>
+              <p className="text-gray-600">{j.status || "—"}</p>
             </div>
           </div>
         </div>
@@ -123,12 +186,12 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
           )}
         </div>
 
-        {/* Key Responsibilities */}
-        {Array.isArray(j.responsibilities) && j.responsibilities.length > 0 && (
+        {/* Required Skills */}
+        {Array.isArray(j.requiredSkills) && j.requiredSkills.length > 0 && (
           <div className="space-y-3 border-t border-gray-200 pt-6 text-gray-800">
-            <h3 className="text-lg font-semibold">Key Responsibilities</h3>
+            <h3 className="text-lg font-semibold">Required Skills</h3>
             <ul className="list-disc pl-6 space-y-2 text-gray-700">
-              {j.responsibilities.map((item: string, index: number) => (
+              {j.requiredSkills.map((item: string, index: number) => (
                 <li key={index}>{item}</li>
               ))}
             </ul>
@@ -154,6 +217,7 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
         <div className="space-y-2">
           <Label>Job Title *</Label>
           <Input
+            className="h-[48px]"
             type="text"
             value={formData.title || (edit ? job?.title : "") || ""}
             onChange={(e) => handleInputChange("title", e.target.value)}
@@ -161,14 +225,27 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
           />
         </div>
 
-        {/* Company */}
+        {/* Company Name */}
         <div className="space-y-2">
-          <Label>Company *</Label>
+          <Label>Company Name *</Label>
           <Input
+            className="h-[48px]"
             type="text"
-            value={formData.company || (edit ? job?.companyName : "") || ""}
-            onChange={(e) => handleInputChange("company", e.target.value)}
+            value={formData.companyName || (edit ? job?.companyName : "") || ""}
+            onChange={(e) => handleInputChange("companyName", e.target.value)}
             placeholder="Enter company name"
+          />
+        </div>
+
+        {/* Company Type */}
+        <div className="space-y-2">
+          <Label>Company Type *</Label>
+          <Input
+            className="h-[48px]"
+            type="text"
+            value={formData.companyType || (edit ? job?.companyType : "") || ""}
+            onChange={(e) => handleInputChange("companyType", e.target.value)}
+            placeholder="e.g., Software Development"
           />
         </div>
 
@@ -176,6 +253,7 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
         <div className="space-y-2">
           <Label>Location *</Label>
           <Input
+            className="h-[48px]"
             type="text"
             value={formData.location || (edit ? job?.location : "") || ""}
             onChange={(e) => handleInputChange("location", e.target.value)}
@@ -183,35 +261,27 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
           />
         </div>
 
-        {/* Category */}
+        {/* Posted By */}
         <div className="space-y-2">
-          <Label>Category *</Label>
-          <Select
-            value={formData.category || (edit ? job?.category : "") || ""}
-            onValueChange={(value) => handleInputChange("category", value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Law">Law</SelectItem>
-              <SelectItem value="Technology">Technology</SelectItem>
-              <SelectItem value="Finance">Finance</SelectItem>
-              <SelectItem value="Healthcare">Healthcare</SelectItem>
-              <SelectItem value="Engineering">Engineering</SelectItem>
-              <SelectItem value="Marketing">Marketing</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label>Posted By *</Label>
+          <Input
+            className="h-[48px]"
+            type="text"
+            value={formData.postedBy || (edit ? job?.postedBy : "") || ""}
+            onChange={(e) => handleInputChange("postedBy", e.target.value)}
+            placeholder="Enter poster name"
+          />
         </div>
 
         {/* Salary Range */}
         <div className="space-y-2">
           <Label>Salary Range *</Label>
           <Input
+            className="h-[48px]"
             type="text"
-            value={formData.salary || (edit ? job?.salaryRange : "") || ""}
-            onChange={(e) => handleInputChange("salary", e.target.value)}
-            placeholder="e.g., ৳30,000 - ৳45,000 per month"
+            value={formData.salaryRange || (edit ? job?.salaryRange : "") || ""}
+            onChange={(e) => handleInputChange("salaryRange", e.target.value)}
+            placeholder="Enter salary range"
           />
         </div>
 
@@ -222,12 +292,12 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
             value={formData.level || (edit ? job?.level : "") || ""}
             onValueChange={(value) => handleInputChange("level", value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-[48px]">
               <SelectValue placeholder="Select level" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Junior">Junior</SelectItem>
-              <SelectItem value="Mid-level">Mid-level</SelectItem>
+              <SelectItem value="Entry-Level">Entry-Level</SelectItem>
+              <SelectItem value="Mid-Level">Mid-Level</SelectItem>
               <SelectItem value="Senior">Senior</SelectItem>
             </SelectContent>
           </Select>
@@ -237,6 +307,7 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
         <div className="space-y-2">
           <Label>Start Date *</Label>
           <Input
+            className="h-[48px]"
             type="date"
             value={formData.startDate || (edit ? job?.startDate?.split('T')[0] : "") || ""}
             onChange={(e) => handleInputChange("startDate", e.target.value)}
@@ -247,44 +318,76 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
         <div className="space-y-2">
           <Label>Application Deadline *</Label>
           <Input
+            className="h-[48px]"
             type="date"
-            value={formData.deadline || (edit ? job?.applicationDeadline?.split('T')[0] : "") || ""}
-            onChange={(e) => handleInputChange("deadline", e.target.value)}
+            value={formData.applicationDeadline || (edit ? job?.applicationDeadline?.split('T')[0] : "") || ""}
+            onChange={(e) => handleInputChange("applicationDeadline", e.target.value)}
           />
         </div>
       </div>
 
-      {/* Job Description - FIXED with debounce */}
+      {/* Job Description */}
       <div className="space-y-2">
-        <Label>Job Descriptions</Label>
-        <div className="border rounded-md">
+        <Label>Description</Label>
+        <div className="rounded-lg border border-gray-200 overflow-hidden">
           <TextEditor
-            data={formData.content || (edit ? job?.description : "") || ""}
+            data={formData.description || (edit ? job?.description : "") || ""}
             onChange={debouncedContentChange} // ← Now debounced - no more loop!
           />
         </div>
       </div>
 
-      {/* Key Responsibilities */}
+      {/* Required Skills */}
       <div className="space-y-2">
-        <Label>Key Responsibilities (one per line)</Label>
-        <Textarea
-          value={
-            formData.responsibilities ||
-            (edit && Array.isArray(job?.responsibilities)
-              ? job.responsibilities.join("\n")
-              : "") ||
-            ""
-          }
-          onChange={(e) => handleInputChange("responsibilities", e.target.value)}
-          rows={4}
-          placeholder="Enter key responsibilities, one per line..."
-        />
+        <Label>Required Skills</Label>
+        <div className="flex items-center gap-2">
+          <Input
+            className="h-[48px]"
+            type="text"
+            value={skillInput}
+            onChange={(e) => setSkillInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleAddSkill();
+              }
+            }}
+            placeholder="Type one skill"
+          />
+          <button
+            type="button"
+            onClick={handleAddSkill}
+            className="h-[48px] w-[48px] rounded-md border border-gray-300 flex items-center justify-center hover:bg-gray-100"
+            aria-label="Add skill"
+          >
+            <FaPlus />
+          </button>
+        </div>
+        {requiredSkills.length > 0 && (
+          <div className="flex flex-wrap gap-2 pt-2">
+            {requiredSkills.map((skill, index) => (
+              <div
+                key={`${skill}-${index}`}
+                className="inline-flex items-center gap-2 bg-gray-100 text-gray-800 px-3 py-1.5 rounded-full text-sm"
+              >
+                <span>{skill}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveSkill(skill)}
+                  className="text-gray-500 hover:text-red-600 leading-none"
+                  aria-label={`Remove ${skill}`}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Additional Info */}
       <div className="space-y-2">
-        <Label>Additional Information</Label>
+        <Label>Additional Info</Label>
         <Textarea
           value={formData.additionalInfo || (edit ? job?.additionalInfo : "") || ""}
           onChange={(e) => handleInputChange("additionalInfo", e.target.value)}
@@ -293,22 +396,24 @@ const ManageJobFeilds: React.FC<ManageJobFeildsProps> = ({
         />
       </div>
 
-      {/* Job Status */}
-      <div className="space-y-2">
-        <Label>Job Status</Label>
-        <Select
-          value={formData.status || (edit ? job?.jobStatus : "Open") || "Open"}
-          onValueChange={(value) => handleInputChange("status", value)}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="Open">Open</SelectItem>
-            <SelectItem value="Closed">Closed</SelectItem>
-            <SelectItem value="Draft">Draft</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Job Status */}
+        <div className="space-y-2">
+          <Label>Job Status</Label>
+          <Select
+            value={formData.jobStatus || (edit ? job?.jobStatus : "Open") || "Open"}
+            onValueChange={(value) => handleInputChange("jobStatus", value)}
+          >
+            <SelectTrigger className="h-[48px]">
+              <SelectValue placeholder="Select job status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Open">Open</SelectItem>
+              <SelectItem value="Closed">Closed</SelectItem>
+              <SelectItem value="Paused">Paused</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );
