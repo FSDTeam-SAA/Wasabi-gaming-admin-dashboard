@@ -127,7 +127,7 @@ const Editor = forwardRef<any, EditorProps>(
       }
     }, [readOnly, ref]);
 
-    return <div ref={containerRef} style={{ height: "40vh" }} />;
+    return <div ref={containerRef} style={{ minHeight: "220px", height: "260px" }} />;
   }
 );
 
