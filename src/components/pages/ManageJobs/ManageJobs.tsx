@@ -1,3 +1,8 @@
+
+
+
+
+
 // "use client";
 // import React, { useState } from "react";
 // import Headers from "../../Reusable/Headers";
@@ -16,7 +21,7 @@
 // import LoderComponent from "@/components/loader/LoderComponent";
 // import { ReusablePagination } from "@/components/pagination";
 
-// // Jobs Card Component (একদম অপরিবর্তিত)
+// // Jobs Card Component (unchanged except minor status fallback)
 // const JobsCard = ({
 //   company,
 //   position,
@@ -28,16 +33,18 @@
 //   onSelect,
 //   isSelected,
 // }) => {
-//  const displayStatus = status;  // যেমন আছে তেমনই রাখা
+//   const displayStatus = status || "pending";
 
-// const statusColor =
-//   status === "active"
-//     ? "bg-[#DCFCE7] text-[#008236]"
-//     : status === "Approved"
-//     ? "bg-green-200 text-green-800"
-//     : status === "Rejected" || status === "Inactive" || status === "Closed"
-//     ? "bg-red-200 text-red-800"
-//     : "bg-yellow-200 text-yellow-800";   // default / pending
+//   const statusColor =
+//     displayStatus === "active"
+//       ? "bg-[#DCFCE7] text-[#008236]"
+//       : displayStatus === "Approved"
+//       ? "bg-green-200 text-green-800"
+//       : displayStatus === "Rejected" ||
+//         displayStatus === "Inactive" ||
+//         displayStatus === "Closed"
+//       ? "bg-red-200 text-red-800"
+//       : "bg-yellow-200 text-yellow-800"; // default / pending / Open
 
 //   const handleDelete = () => {
 //     Swal.fire({
@@ -64,8 +71,6 @@
 //           title: "Deleted!",
 //           text: "The job has been deleted successfully.",
 //           icon: "success",
-//           iconHtml:
-//             '<div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full"><FaCheck class="text-green-600 text-2xl" /></div>',
 //           background: "#ffffff",
 //           confirmButtonColor: "#10b981",
 //           confirmButtonText: "Done",
@@ -74,7 +79,6 @@
 //             title: "text-gray-800 font-semibold text-xl",
 //             htmlContainer: "text-gray-600",
 //             confirmButton: "rounded-xl px-6 py-2 font-medium",
-//             icon: "border-0",
 //           },
 //         }).then(() => {
 //           onDelete();
@@ -161,7 +165,7 @@
 
 //   const queryClient = useQueryClient();
 
-//   // Fetch jobs
+//   // Fetch jobs (unchanged)
 //   const { data, isLoading, isError } = useQuery({
 //     queryKey: ["jobs", TOKEN],
 //     queryFn: async () => {
@@ -213,17 +217,20 @@
 //     enabled: !!TOKEN,
 //   });
 
-//   // Create New Job Mutation
+//   // Create New Job – now uses /job/manual-job
 //   const createManageJob = useMutation({
 //     mutationFn: async (newJob: any) => {
-//       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/job`, {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           Authorization: `Bearer ${TOKEN}`,
-//         },
-//         body: JSON.stringify(newJob),
-//       });
+//       const res = await fetch(
+//         `${process.env.NEXT_PUBLIC_API_BASE_URL}/job/manual-job`,
+//         {
+//           method: "POST",
+//           headers: {
+//             "Content-Type": "application/json",
+//             Authorization: `Bearer ${TOKEN}`,
+//           },
+//           body: JSON.stringify(newJob),
+//         }
+//       );
 
 //       if (!res.ok) {
 //         const err = await res.json().catch(() => ({}));
@@ -297,7 +304,7 @@
 //     },
 //   });
 
-//   // Delete Job Mutation
+//   // Delete Job Mutation (unchanged)
 //   const deleteMutation = useMutation({
 //     mutationFn: async (jobId: string) => {
 //       const res = await fetch(
@@ -340,7 +347,7 @@
 //     },
 //   });
 
-//   // Approve Job Mutation
+//   // Approve Job Mutation (unchanged)
 //   const approveJobMutation = useMutation({
 //     mutationFn: async (jobId: string) => {
 //       const res = await fetch(
@@ -390,9 +397,11 @@
 //     safeCurrentPage * itemsPerPage
 //   );
 
-//   // Loading & Error states
 //   if (isLoading) return <LoderComponent />;
-//   if (isError) return <div className="text-center py-10 text-red-600">Error loading jobs...</div>;
+//   if (isError)
+//     return (
+//       <div className="text-center py-10 text-red-600">Error loading jobs...</div>
+//     );
 
 //   const handleDeleteJob = (jobId: string) => {
 //     Swal.fire({
@@ -434,42 +443,44 @@
 //     approveJobMutation.mutate(selectedJobId);
 //   };
 
-//   // Create or Update handler – এখন পেলোড সঠিকভাবে ম্যাপ করে পাঠানো হচ্ছে
+//   // ── Main change: payload matches your Postman example ──
 //   const handleSave = (rawFormData: any) => {
-//     // backend-এর প্রত্যাশিত ফরম্যাটে পেলোড তৈরি
 //     const payload = {
-//       title: rawFormData.title || "",
-//       location: rawFormData.location || "",
-//       companyName: rawFormData.company || "",          // ← company → companyName
-//       companyType: rawFormData.companyType || "Private",
-//       postedBy: rawFormData.postedBy || "Admin",
-//       level: rawFormData.level || "",
-//       salaryRange: rawFormData.salary || "",           // ← salary → salaryRange
+//       title: rawFormData.title?.trim() || "",
+//       location: rawFormData.location?.trim() || "",
+//       companyName: rawFormData.companyName?.trim() || "",
+//       companyType: rawFormData.companyType?.trim() || "Software Development",
+//       postedBy: rawFormData.postedBy?.trim() || "Admin",
+//       level: rawFormData.level?.trim() || "",
+//       salaryRange: rawFormData.salaryRange?.trim() || "",
 //       startDate: rawFormData.startDate
-//         ? new Date(rawFormData.startDate).toISOString()
+//         ? new Date(rawFormData.startDate).toISOString().split("T")[0]
 //         : "",
-//       applicationDeadline: rawFormData.deadline
-//         ? new Date(rawFormData.deadline).toISOString()
+//       applicationDeadline: rawFormData.applicationDeadline
+//         ? new Date(rawFormData.applicationDeadline).toISOString().split("T")[0]
 //         : "",
-//       jobId: rawFormData.jobId || `JOB-${Date.now()}`,
-//       jobStatus: rawFormData.status || "Open",
-//       description: rawFormData.content || "",          // ← content → description
-//       responsibilities: rawFormData.responsibilities
-//         ? rawFormData.responsibilities.split("\n").filter((item: string) => item.trim())
+//       jobStatus: rawFormData.jobStatus || "Open",
+//       description: rawFormData.description?.trim() || "",
+//       additionalInfo: rawFormData.additionalInfo?.trim() || "",
+//       status: rawFormData.status || "active",
+//       requiredSkills: Array.isArray(rawFormData.requiredSkills)
+//         ? rawFormData.requiredSkills
+//         : typeof rawFormData.requiredSkills === "string"
+//         ? rawFormData.requiredSkills
+//             .split(/[\n,]+/)
+//             .map((s: string) => s.trim())
+//             .filter(Boolean)
 //         : [],
-//       additionalInfo: rawFormData.additionalInfo || "",
 //     };
 
 //     console.log("Sending payload to API:", payload);
 
 //     if (isEdit && selectedJob?._id) {
-//       // Edit mode
 //       updateJobMutation.mutate({
 //         ...payload,
 //         _id: selectedJob._id,
 //       });
 //     } else {
-//       // Create mode
 //       createManageJob.mutate(payload);
 //     }
 //   };
@@ -507,9 +518,9 @@
 //           {paginatedJobs.map((job) => (
 //             <JobsCard
 //               key={job._id}
-//               company={job.companyName}
-//               position={job.title}
-//               status={job.status }
+//               company={job.companyName || job.company || "Unknown Company"}
+//               position={job.title || "Untitled Position"}
+//               status={job.status || job.jobStatus || "pending"}
 //               date={new Date(job.createdAt).toLocaleDateString("en-US", {
 //                 month: "short",
 //                 day: "numeric",
@@ -575,7 +586,6 @@
 
 
 
-
 "use client";
 import React, { useState } from "react";
 import Headers from "../../Reusable/Headers";
@@ -588,6 +598,7 @@ import {
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 import ReusableModal from "../../Reusable/ReusableModal";
+import AddManualJobModal from "./AddManualJobModal";
 import { FaPlus } from "react-icons/fa6";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
@@ -790,51 +801,6 @@ const ManageJobs = () => {
     enabled: !!TOKEN,
   });
 
-  // Create New Job – now uses /job/manual-job
-  const createManageJob = useMutation({
-    mutationFn: async (newJob: any) => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/job/manual-job`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${TOKEN}`,
-          },
-          body: JSON.stringify(newJob),
-        }
-      );
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Failed to create new job");
-      }
-
-      return res.json();
-    },
-
-    onSuccess: () => {
-      Swal.fire({
-        title: "Created!",
-        text: "New job created successfully",
-        icon: "success",
-        confirmButtonText: "OK",
-      });
-
-      queryClient.invalidateQueries({ queryKey: ["jobs"] });
-      setIsModalOpen(false);
-    },
-
-    onError: (err: any) => {
-      Swal.fire({
-        title: "Error",
-        text: err.message || "Could not create the job. Please try again.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-    },
-  });
-
   // Update Job Mutation
   const updateJobMutation = useMutation({
     mutationFn: async (updatedJob: any) => {
@@ -1003,10 +969,6 @@ const ManageJobs = () => {
     setIsEdit(true);
   };
 
-  const handleCloseCreateModal = () => {
-    setIsModalOpen(false);
-  };
-
   const handleSelectJob = (jobId: string) => {
     setSelectedJobId((prev) => (prev === jobId ? "" : jobId));
   };
@@ -1016,7 +978,7 @@ const ManageJobs = () => {
     approveJobMutation.mutate(selectedJobId);
   };
 
-  // ── Main change: payload matches your Postman example ──
+  // Edit payload mapper for existing reusable edit modal
   const handleSave = (rawFormData: any) => {
     const payload = {
       title: rawFormData.title?.trim() || "",
@@ -1048,14 +1010,12 @@ const ManageJobs = () => {
 
     console.log("Sending payload to API:", payload);
 
-    if (isEdit && selectedJob?._id) {
-      updateJobMutation.mutate({
-        ...payload,
-        _id: selectedJob._id,
-      });
-    } else {
-      createManageJob.mutate(payload);
-    }
+    if (!isEdit || !selectedJob?._id) return;
+
+    updateJobMutation.mutate({
+      ...payload,
+      _id: selectedJob._id,
+    });
   };
 
   return (
@@ -1120,15 +1080,7 @@ const ManageJobs = () => {
         />
       )}
 
-      {/* Create Modal */}
-      <ReusableModal
-        isOpen={isModalOpen}
-        onClose={handleCloseCreateModal}
-        onSave={handleSave}
-        location={"manageJob"}
-        title="Create New Job"
-        submitText="Create Job"
-      />
+      <AddManualJobModal open={isModalOpen} onOpenChange={setIsModalOpen} />
 
       {/* View Modal */}
       <ReusableModal
