@@ -1,7 +1,9 @@
-.ql-container.ql-snow{
-    border: none;
-    font-size:larger ;
+.ql-toolbar.ql-snow {
+  border: 0;
+  border-bottom: 1px solid #e5e7eb;
 }
-.ql-toolbar.ql-snow{
-    border: none;
+
+.ql-container.ql-snow {
+  border: 0;
+  font-size: 1rem;
 }

@@ -45,10 +45,9 @@ const TextEditor: React.FC<EditSectionProps> = ({ data, section, onChange, value
 
   return (
     <div
-      className="flex w-full bg-white flex-col gap-4 p-3 relative"
+      className="flex w-full bg-white flex-col relative"
       style={{
-        minHeight: "200px",
-        boxShadow: "0px 0px 10px 0px #0000001A",
+        minHeight: "220px",
       }}
     >
       <Editor
