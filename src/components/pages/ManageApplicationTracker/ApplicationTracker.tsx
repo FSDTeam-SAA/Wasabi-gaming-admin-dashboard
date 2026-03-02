@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Headers from "../../Reusable/Headers";
+import { Trash2 } from "lucide-react";
 import {
   FaFileAlt,
   FaBriefcase,
@@ -8,8 +9,18 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import ReusableModal from "../../Reusable/ReusableModal";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const Cards = ({ name, icon, number, details, color }) => {
   return (
@@ -29,6 +40,8 @@ const Cards = ({ name, icon, number, details, color }) => {
 const ApplicationTracker = () => {
   const [open, setOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState("All Status");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedApplication, setSelectedApplication] = useState<any | null>(null);
   const session = useSession();
   const TOKEN = session?.data?.user?.accessToken || "";
 
@@ -53,7 +66,7 @@ const ApplicationTracker = () => {
   });
 
   // Table / List data API
-  const { data: tableResponse, isLoading: tableLoading } = useQuery({
+  const { data: tableResponse, isLoading: tableLoading, refetch } = useQuery({
     queryKey: ["applicationTrackerTable"],
     queryFn: async () => {
       const res = await fetch(
@@ -69,6 +82,32 @@ const ApplicationTracker = () => {
 
       if (!res.ok) throw new Error("Failed to fetch application list");
       return res.json();
+    },
+  });
+
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/application-tracker/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        },
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to delete application");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      setDeleteModalOpen(false);
+      setSelectedApplication(null);
+      refetch();
     },
   });
 
@@ -188,9 +227,9 @@ const ApplicationTracker = () => {
         if (status === "rejected") statusColor = "bg-red-100 text-red-800";
 
         return (
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col items-start gap-1">
             <span
-              className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${statusColor}`}
+              className={`w-fit px-3 py-1 rounded-full text-xs font-medium capitalize ${statusColor}`}
             >
               {value || "Unknown"}
             </span>
@@ -200,6 +239,22 @@ const ApplicationTracker = () => {
           </div>
         );
       },
+    },
+    {
+      header: "Action",
+      accessor: "_id",
+      cell: (value, row) => (
+        <button
+          type="button"
+          onClick={() => {
+            setSelectedApplication(row);
+            setDeleteModalOpen(true);
+          }}
+          className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-200 text-red-500 transition hover:bg-red-50"
+        >
+          <Trash2 size={16} />
+        </button>
+      ),
     },
   ];
 
@@ -223,6 +278,12 @@ const ApplicationTracker = () => {
     <div className="w-full flex flex-col gap-8">
       <div className="flex justify-between items-center">
         <Headers title={title} subHeader={subtitle} />
+        <Link
+          href="/dashboard/application-tacker/create-application"
+          className="flex items-center gap-2 bg-[#FFFF00] hover:bg-yellow-500 py-3 px-6 rounded-xl shadow-sm hover:shadow-md transition-all font-semibold text-gray-900"
+        >
+          Create Application
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -325,6 +386,42 @@ const ApplicationTracker = () => {
         title="Add New Application"
         submitText="Save Application"
       />
+
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent className="sm:max-w-[430px]">
+          <DialogHeader>
+            <DialogTitle>Delete Application</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this application
+              {selectedApplication?.schoolName?.schoolName
+                ? ` for ${selectedApplication.schoolName.schoolName}`
+                : ""}{" "}
+              ? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDeleteModalOpen(false);
+                setSelectedApplication(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (!selectedApplication?._id) return;
+                deleteMutation.mutate(selectedApplication._id);
+              }}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
