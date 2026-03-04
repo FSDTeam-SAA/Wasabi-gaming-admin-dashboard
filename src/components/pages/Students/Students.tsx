@@ -180,7 +180,7 @@ const Students = () => {
                 <th className="py-4 px-4 font-semibold">Grade</th>
                 <th className="py-4 px-4 font-semibold">Courses</th>
                 <th className="py-4 px-4 font-semibold">Status</th>
-                <th className="py-4 px-4 font-semibold">Purchas plans</th>
+                <th className="py-4 px-4 font-semibold">Plan</th>
                 <th className="py-4 px-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -195,14 +195,14 @@ const Students = () => {
                   <td className="py-4 px-4">{student.course?.length || 0}</td>
                   <td className="py-4 px-4">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        student.status === "active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-200 text-gray-600"
-                      }`}
-                    >
-                      {student.status}
-                    </span>
+  className={`px-3 py-1 rounded-full text-xs font-medium ${
+    student.status?.toLowerCase() === "active"
+      ? "bg-green-100 text-green-700"
+      : "bg-gray-200 text-gray-600"
+  }`}
+>
+  {student.status?.charAt(0).toUpperCase() + student.status?.slice(1).toLowerCase()}
+</span>
                   </td>
                   <td className="py-4 px-4">
                     <span
