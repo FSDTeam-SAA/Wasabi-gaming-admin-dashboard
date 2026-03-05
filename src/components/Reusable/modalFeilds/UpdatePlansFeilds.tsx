@@ -17,6 +17,7 @@ interface UpdatePlansFeildsProps {
   view?: boolean
   job?: any
   onClose?: () => void
+  location?: string
 }
 
 const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
@@ -26,6 +27,7 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
   edit = false,
   view = false,
   job,
+  location,
 }) => {
   const [featureInput, setFeatureInput] = useState('')
   const disabled = false
@@ -73,28 +75,30 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
 
   return (
     <div className="space-y-6 p-1">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label className="block text-sm font-medium text-gray-700">
-            Plan Name
-          </label>
-          <span className="text-xs text-gray-400">Required</span>
+      {location !== 'school-plans' && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="block text-sm font-medium text-gray-700">
+              Plan Name
+            </label>
+            <span className="text-xs text-gray-400">Required</span>
+          </div>
+          <Select
+            value={formData.name || ''}
+            onValueChange={value => onChange('name', value)}
+            disabled={disabled}
+          >
+            <SelectTrigger className="w-full h-[52px] rounded-xl border-gray-300 focus:ring-yellow-400">
+              <SelectValue placeholder="Select plan name" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="premium">Premium</SelectItem>
+              <SelectItem value="free">Free</SelectItem>
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-gray-500">Choose the plan tier</p>
         </div>
-        <Select
-          value={formData.name || ''}
-          onValueChange={value => onChange('name', value)}
-          disabled={disabled}
-        >
-          <SelectTrigger className="w-full h-[52px] rounded-xl border-gray-300 focus:ring-yellow-400">
-            <SelectValue placeholder="Select plan name" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="premium">Premium</SelectItem>
-            <SelectItem value="free">Free</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-gray-500">Choose the plan tier</p>
-      </div>
+      )}
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
@@ -155,30 +159,32 @@ const UpdatePlansFields: React.FC<UpdatePlansFeildsProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Subscription Category
-          <span className="text-gray-400 font-normal ml-2">(Optional)</span>
-        </label>
-        <div className="w-full">
-          <Select
-            value={formData.subscriptionCategory || ''}
-            onValueChange={value => onChange('subscriptionCategory', value)}
-            disabled={disabled}
-          >
-            <SelectTrigger className="w-full h-[52px] rounded-xl border-gray-300 focus:ring-yellow-400">
-              <SelectValue placeholder="Select category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="students">Students</SelectItem>
-              <SelectItem value="school">School</SelectItem>
-            </SelectContent>
-          </Select>
-          <p className="text-xs text-gray-500 mt-2">
-            Select who this plan is designed for
-          </p>
+      {location !== 'school-plans' && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Subscription Category
+            <span className="text-gray-400 font-normal ml-2">(Optional)</span>
+          </label>
+          <div className="w-full">
+            <Select
+              value={formData.subscriptionCategory || ''}
+              onValueChange={value => onChange('subscriptionCategory', value)}
+              disabled={disabled}
+            >
+              <SelectTrigger className="w-full h-[52px] rounded-xl border-gray-300 focus:ring-yellow-400">
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="students">Students</SelectItem>
+                <SelectItem value="school">School</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500 mt-2">
+              Select who this plan is designed for
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Features Section */}
       <div className="space-y-2">

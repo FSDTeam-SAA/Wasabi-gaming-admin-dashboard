@@ -372,9 +372,20 @@ import {
   FaTimesCircle,
 } from "react-icons/fa";
 import Headers from "../../Reusable/Headers";
+import ReusableModal from "../../Reusable/ReusableModal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import LoderComponent from "@/components/loader/LoderComponent"; // যদি তোমার কাছে থাকে
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+
+const DEFAULT_FEATURES = [
+  "Everything included in the Premium plan",
+  "School dashboard access",
+  "Cohort management and analytics",
+  "Student progress tracking",
+  "School workshops and events",
+  "Dedicated support"
+];
 
 // SchoolCards কম্পোনেন্ট (একদম আগের মতোই রাখা হয়েছে)
 interface SchoolCardsProps {
@@ -382,10 +393,14 @@ interface SchoolCardsProps {
   type: string;
   date: string;
   status: string;
+  subscription?: any;
   onDelete: () => void;
   isSelected: boolean;
   onSelect: () => void;
   onStatusChange: (newStatus: string) => void;
+  onApproveClick: () => void;
+  onEditPlan: () => void;
+  onViewDetails: () => void;
 }
 
 const SchoolCards: React.FC<SchoolCardsProps> = ({
@@ -393,19 +408,23 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
   type,
   date,
   status,
+  subscription,
   onDelete,
   isSelected,
   onSelect,
   onStatusChange,
+  onApproveClick,
+  onEditPlan,
+  onViewDetails,
 }) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   const statusColor =
-    status === "Premium"
-      ? "bg-purple-200 text-purple-800"
-      : status === "Approved"
+    status === "accepted"
       ? "bg-green-200 text-green-800"
-      : status === "Rejected"
-      ? "bg-red-200 text-red-800"
-      : "bg-yellow-200 text-yellow-800";
+      : status === "rejected"
+        ? "bg-red-200 text-red-800"
+        : "bg-yellow-200 text-yellow-800";
 
   const handleDelete = (e) => {
     e.stopPropagation();
@@ -507,7 +526,7 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        onStatusChange("Premium");
+        onStatusChange("premium");
       }
     });
   };
@@ -533,7 +552,7 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        onStatusChange("Pending");
+        onStatusChange("pending");
       }
     });
   };
@@ -559,16 +578,15 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        onStatusChange("Pending");
+        onStatusChange("pending");
       }
     });
   };
 
   return (
     <div
-      className={`w-full bg-white shadow-sm rounded-2xl p-5 border-2 flex flex-col gap-5 hover:shadow-md transition-all duration-200 cursor-pointer ${
-        isSelected ? "border-yellow-500" : "border-gray-100"
-      }`}
+      className={`w-full bg-white shadow-sm rounded-2xl p-5 border-2 flex flex-col gap-5 hover:shadow-md transition-all duration-200 cursor-pointer ${isSelected ? "border-yellow-500" : "border-gray-100"
+        }`}
       onClick={onSelect}
     >
       <div className="flex justify-between items-center">
@@ -581,7 +599,7 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
           >
             {status}
           </p>
-          {status === "Premium" && (
+          {status === "accepted" && subscription && (
             <div className="flex items-center gap-1 mt-1">
               <FaCrown size={12} className="text-purple-500" />
               <span className="text-xs text-gray-500">Premium</span>
@@ -601,49 +619,116 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-3">
-        {status === "Premium" ? (
-          <button
-            onClick={handleRevokeApproval}
-            className="flex items-center justify-center gap-2 flex-1 border border-yellow-300 bg-gradient-to-r from-yellow-50 to-amber-50 py-2 rounded-3xl text-yellow-700 font-medium hover:from-yellow-100 hover:to-amber-100 transition-all shadow-sm"
-          >
-            <FaTimesCircle size={14} className="text-yellow-600" /> Downgrade
-          </button>
-        ) : status === "Approved" ? (
+      <div className="flex items-center justify-between gap-3 relative">
+        {status === "accepted" ? (
           <>
             <button
-              onClick={handleGetPremium}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEditPlan();
+              }}
               className="flex items-center justify-center gap-2 flex-1 border border-purple-300 bg-gradient-to-r from-purple-50 to-indigo-50 py-2 rounded-3xl text-purple-700 font-medium hover:from-purple-100 hover:to-indigo-100 transition-all shadow-sm"
             >
-              <FaCrown size={14} className="text-purple-600" /> Get Premium
+              <FaCrown size={14} className="text-purple-600" /> Edit Plan
             </button>
             <button
-              onClick={handleRevokeApproval}
-              className="flex items-center justify-center gap-2 flex-1 border border-yellow-300 bg-gradient-to-r from-yellow-50 to-amber-50 py-2 rounded-3xl text-yellow-700 font-medium hover:from-yellow-100 hover:to-amber-100 transition-all shadow-sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails();
+              }}
+              className="flex items-center justify-center gap-2 px-3 border border-gray-200 bg-gray-50 py-2 rounded-3xl text-gray-700 font-medium hover:bg-gray-100 transition-all text-sm"
             >
-              <FaTimesCircle size={14} className="text-yellow-600" /> Revoke
+              Details
+            </button>
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMenuOpen(!isMenuOpen);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <div className="flex flex-col gap-0.5">
+                  <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                  <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                  <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                </div>
+              </button>
+              {isMenuOpen && (
+                <div className="absolute right-0 bottom-full mb-2 w-32 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange("pending");
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-yellow-600 hover:bg-yellow-50 transition-colors"
+                  >
+                    Set Pending
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onStatusChange("rejected");
+                      setIsMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Reject
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        ) : status === "rejected" ? (
+          <>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReopenRejected(e);
+              }}
+              className="flex items-center justify-center gap-2 flex-1 border border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 py-2 rounded-3xl text-green-700 font-medium hover:from-green-100 hover:to-emerald-100 transition-all"
+            >
+              <FaCheckCircle size={14} className="text-green-600" /> Reopen
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails();
+              }}
+              className="flex items-center justify-center gap-2 px-3 border border-gray-200 bg-gray-50 py-2 rounded-3xl text-gray-700 font-medium hover:bg-gray-100 transition-all text-sm"
+            >
+              Details
             </button>
           </>
-        ) : status === "Rejected" ? (
-          <button
-            onClick={handleReopenRejected}
-            className="flex items-center justify-center gap-2 flex-1 border border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 py-2 rounded-3xl text-green-700 font-medium hover:from-green-100 hover:to-emerald-100 transition-all"
-          >
-            <FaCheckCircle size={14} className="text-green-600" /> Reopen
-          </button>
         ) : (
           <>
             <button
-              onClick={handleApprove}
+              onClick={(e) => {
+                e.stopPropagation();
+                onApproveClick();
+              }}
               className="flex items-center justify-center gap-2 flex-1 border border-green-300 bg-gradient-to-r from-green-50 to-emerald-50 py-2 rounded-3xl text-green-700 font-medium hover:from-green-100 hover:to-emerald-100 transition-all"
             >
               <FaCheckCircle size={14} className="text-green-600" /> Approve
             </button>
             <button
-              onClick={handleReject}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleReject(e);
+              }}
               className="flex items-center justify-center gap-2 flex-1 border border-red-300 bg-gradient-to-r from-red-50 to-rose-50 py-2 rounded-3xl text-red-700 font-medium hover:from-red-100 hover:to-rose-100 transition-all"
             >
               <FaTimesCircle size={14} className="text-red-600" /> Reject
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails();
+              }}
+              className="flex items-center justify-center gap-2 px-3 border border-gray-200 bg-gray-50 py-2 rounded-3xl text-gray-700 font-medium hover:bg-gray-100 transition-all text-sm"
+            >
+              Details
             </button>
           </>
         )}
@@ -653,9 +738,168 @@ const SchoolCards: React.FC<SchoolCardsProps> = ({
 };
 
 const ManageSchool = () => {
+  const [isPlanModalOpen, setIsPlanModalOpen] = useState(false);
+  const [selectedSchoolData, setSelectedSchoolData] = useState<any>(null);
+  const [isEditingPlan, setIsEditingPlan] = useState(false);
+
+  // Details Modal State
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [selectedDetailsData, setSelectedDetailsData] = useState<any>(null);
+
   const queryClient = useQueryClient();
   const session = useSession();
   const TOKEN = session?.data?.user?.accessToken || "";
+
+  // Create Subscription Mutation
+  const createSubscriptionMutation = useMutation({
+    mutationFn: async ({ schoolId, payload }: { schoolId: string; payload: any }) => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/premium/school-subscribe/${schoolId}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create subscription");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["manageSchools"] });
+      setIsPlanModalOpen(false);
+      toast.success("School approved and plan created successfully!");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  // Update Subscription Mutation
+  const updateSubscriptionMutation = useMutation({
+    mutationFn: async ({ schoolId, payload }: { schoolId: string; payload: any }) => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/premium/school-subscribe/${schoolId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update subscription");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["manageSchools"] });
+      setIsPlanModalOpen(false);
+      toast.success("Plan updated successfully!");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    },
+  });
+
+  const handleApproveClick = (school: any) => {
+    setSelectedSchoolData({
+      _id: school._id || school.id,
+      name: "premium",
+      features: [
+        "Everything included in the Premium plan",
+        "School dashboard access",
+        "Cohort management and analytics",
+        "Student progress tracking",
+        "School workshops and events",
+        "Dedicated support"
+      ],
+      price: 20,
+      type: "monthly",
+    });
+    setIsEditingPlan(false);
+    setIsPlanModalOpen(true);
+  };
+
+  const handleEditPlan = async (school: any) => {
+    // Extract subscription ID from the nested structures
+    const subId = school.subscribedSchool?._id || school.subscription?._id || school.subscription?.subscription?._id;
+    const schoolId = school._id || school.id;
+
+    if (!subId) {
+      toast.error("No subscription ID found for this school.");
+      return;
+    }
+
+    try {
+      // Fetch the subscription data first to ensure it's loaded before modal opens
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/premium/${subId}`, {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch plan details");
+      }
+
+      const resData = await response.json();
+      const sub = resData.data;
+
+      if (sub) {
+        setSelectedSchoolData({
+          _id: schoolId,
+          name: sub.name || "premium",
+          price: sub.price || 0,
+          type: sub.type || "monthly",
+          features: Array.isArray(sub.features) ? sub.features : (sub.features ? [sub.features] : []),
+        });
+
+        // Open the modal only AFTER data is fetched and set
+        setIsEditingPlan(true);
+        setIsPlanModalOpen(true);
+      } else {
+        toast.error("Subscription data not found.");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleViewDetails = (school: any) => {
+    setSelectedDetailsData(school);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleSavePlan = async (formData: any) => {
+    const payload = {
+      price: Number(formData.price),
+      type: formData.type,
+      features: formData.features,
+    };
+
+    if (isEditingPlan) {
+      updateSubscriptionMutation.mutate({
+        schoolId: selectedSchoolData._id,
+        payload,
+      });
+    } else {
+      // For creation, we also need to update school status to accepted
+      // Usually, the backend might handle this in one go or we do it sequentially.
+      // Based on user request: "school approve korle ei plans create pop up open hbe"
+      // We'll create the subscription which implies approval.
+      createSubscriptionMutation.mutate({
+        schoolId: selectedSchoolData._id,
+        payload,
+      });
+      // Optionally update status if the subscription API doesn't do it
+      updateSchoolMutation.mutate({ id: selectedSchoolData._id, schoolStatus: "accepted" });
+    }
+  };
 
   // GET all schools
   const { data, isLoading, isError, error } = useQuery({
@@ -801,17 +1045,40 @@ const ManageSchool = () => {
               name={school.name || school.schoolName || "Unnamed School"}
               type={school.type || "Unknown"}
               date={school.createdAt ? new Date(school.createdAt).toLocaleDateString() : "N/A"}
-              status={school.status || "Pending"}
+              status={school.schoolStatus || "pending"}
+              subscription={school.subscription}
               isSelected={selectedSchool === (school._id || school.id)}
               onSelect={() => handleSelectSchool(school._id || school.id)}
               onDelete={() => handleDelete(school._id || school.id)}
-              onStatusChange={(newStatus) =>
-                handleStatusChange(school._id || school.id, newStatus)
-              }
+              onEditPlan={() => handleEditPlan(school)}
+              onApproveClick={() => handleApproveClick(school)}
+              onStatusChange={(newStatus) => updateSchoolMutation.mutate({ id: school._id || school.id, schoolStatus: newStatus })}
+              onViewDetails={() => handleViewDetails(school)}
             />
           ))
         )}
       </div>
+
+      <ReusableModal
+        isOpen={isPlanModalOpen}
+        onClose={() => setIsPlanModalOpen(false)}
+        onSave={handleSavePlan}
+        location="school-plans"
+        title={isEditingPlan ? "Update School Plan" : "Approve School & Create Plan"}
+        edit={isEditingPlan}
+        submitText={isEditingPlan ? "Update" : "Approve & Create"}
+        data={selectedSchoolData}
+        loading={createSubscriptionMutation.isPending || updateSubscriptionMutation.isPending}
+      />
+
+      <ReusableModal
+        isOpen={isDetailsModalOpen}
+        onClose={() => setIsDetailsModalOpen(false)}
+        location="school-details"
+        title="School Application Details"
+        view={true}
+        data={selectedDetailsData}
+      />
     </div>
   );
 };
