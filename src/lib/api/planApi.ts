@@ -66,7 +66,7 @@ export const planApi = {
   // Get all plans
   getAllPlans: async (): Promise<PlansResponse> => {
     const headers = await getAuthHeaders()
-    const response = await fetch(`${API_BASE_URL}/premium/`, {
+    const response = await fetch(`${API_BASE_URL}/premium`, {
       method: 'GET',
       headers,
     })

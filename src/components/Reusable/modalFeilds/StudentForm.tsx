@@ -40,16 +40,20 @@ const StudentForm = ({ formData, onChange }) => {
         <div className="space-y-2">
           <Label>Year Group</Label>
           <Select
-            value={formData.grade || ""}
-            onValueChange={(value) => onChange("grade", value)}
+            value={formData.grade || ''}
+            onValueChange={value => onChange('grade', value)}
           >
             <SelectTrigger className="bg-white">
               <SelectValue placeholder="Select Year Group" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="Year 8">Year 8</SelectItem>
               <SelectItem value="Year 9">Year 9</SelectItem>
               <SelectItem value="Year 10">Year 10</SelectItem>
-              <SelectItem value="Year 11"> Year 11</SelectItem>
+              <SelectItem value="Year 11">Year 11</SelectItem>
+              <SelectItem value="Year 12">Year 12</SelectItem>
+              <SelectItem value="Year 13">Year 13</SelectItem>
+              <SelectItem value="Graduate">Graduate</SelectItem>
             </SelectContent>
           </Select>
         </div>

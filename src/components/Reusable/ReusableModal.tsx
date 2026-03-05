@@ -18,6 +18,7 @@ import CreateLawFeilds from './modalFeilds/CreateLawFeilds'
 import ManageApplicationFeild from './modalFeilds/ManageApplicationFeild'
 import PortfolioFeilds from './modalFeilds/PortfolioFeilds'
 import UpdatePlansFeilds from './modalFeilds/UpdatePlansFeilds'
+import SchoolDetailsFields from './modalFeilds/SchoolDetailsFields'
 import { Loader2 } from 'lucide-react'
 
 interface ReusableModalProps {
@@ -40,7 +41,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
   location,
   isOpen,
   onClose,
-  onSave = () => {},
+  onSave = () => { },
   subTitle,
   submitText = 'Save',
   edit,
@@ -59,17 +60,18 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
       return
     }
 
-    // Set initial data ONLY ONCE when modal first opens
-    if (!hasSetInitialData.current) {
-      if ((view || edit) && data) {
+    // Set initial data when modal opens and data is available
+    if (isOpen && !hasSetInitialData.current) {
+      if (data) {
         setFormData(data)
-      } else {
+        hasSetInitialData.current = true
+      } else if (!edit && !view) {
+        // Only mark as initialized with empty object if we're in "create" mode
         setFormData({})
+        hasSetInitialData.current = true
       }
-      hasSetInitialData.current = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]) // Only depend on isOpen - no loop when formData changes
+  }, [isOpen, data, edit, view])
 
   const handleChange = (name: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [name]: value }))
@@ -158,6 +160,7 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
           />
         )
       case 'plans':
+      case 'school-plans':
         return (
           <UpdatePlansFeilds
             formData={formData}
@@ -166,26 +169,29 @@ const ReusableModal: React.FC<ReusableModalProps> = ({
             view={view}
             edit={edit}
             onClose={onClose}
+            location={location}
           />
         )
+      case 'school-details':
+        return <SchoolDetailsFields formData={formData} />
       default:
         return null
     }
   }
 
   const showButtons = !(
-    view &&
-    (location === 'manageSchool' ||
-      location === 'manageJob' ||
-      location === 'portfolio')
+    location === 'school-details' ||
+    (view &&
+      (location === 'manageSchool' ||
+        location === 'manageJob' ||
+        location === 'portfolio'))
   )
 
   return (
     <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
       <DialogContent
-        className={`max-h-[90vh] overflow-y-auto ${
-          view || location === 'portfolio' ? 'max-w-[60vw]' : 'max-w-4xl'
-        }`}
+        className={`max-h-[90vh] overflow-y-auto ${view || location === 'portfolio' ? 'max-w-[60vw]' : 'max-w-4xl'
+          }`}
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
